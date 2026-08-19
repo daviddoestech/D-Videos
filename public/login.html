@@ -1,90 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Sign in — D-Videos</title>
 
-    <link rel="stylesheet" href="/css/style.css">
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
 </head>
 
 <body class="auth-page">
 
-    <main class="auth-container">
+<main class="auth-container">
 
-        <a href="/" class="auth-logo">
-            <span>D</span>
-            D-Videos
-        </a>
+    <a
+        href="/"
+        class="auth-logo"
+    >
 
-        <div class="auth-card">
+        <span>D</span>
 
-            <div class="auth-header">
-                <h1>Welcome back</h1>
+        D-Videos
 
-                <p>
-                    Sign in to continue watching D-Videos.
-                </p>
-            </div>
+    </a>
 
-            <form id="loginForm">
 
-                <label for="email">
-                    Email
-                </label>
+    <div class="auth-card">
 
-                <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    autocomplete="email"
-                    required
-                >
+        <div class="auth-header">
 
-                <label for="password">
-                    Password
-                </label>
+            <h1>
+                Welcome back
+            </h1>
 
-                <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Your password"
-                    autocomplete="current-password"
-                    required
-                >
-
-                <div
-                    class="auth-error"
-                    id="loginError"
-                    hidden
-                ></div>
-
-                <button
-                    type="submit"
-                    class="auth-submit"
-                    id="loginButton"
-                >
-                    Sign in
-                </button>
-
-            </form>
-
-            <p class="auth-switch">
-                Don't have an account?
-
-                <a href="/signup.html">
-                    Create one
-                </a>
+            <p>
+                Sign in to continue watching D-Videos.
             </p>
 
         </div>
 
-    </main>
 
-    <script src="/js/auth.js"></script>
+        <form id="loginForm">
+
+            <label for="email">
+                Email
+            </label>
+
+            <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+            >
+
+
+            <label for="password">
+                Password
+            </label>
+
+            <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Your password"
+                autocomplete="current-password"
+                required
+            >
+
+
+            <div
+                class="auth-error"
+                id="loginError"
+                hidden
+            ></div>
+
+
+            <button
+                type="submit"
+                class="auth-submit"
+                id="loginButton"
+            >
+                Sign in
+            </button>
+
+        </form>
+
+
+        <p class="auth-switch">
+
+            Don't have an account?
+
+            <a href="/signup.html">
+                Create one
+            </a>
+
+        </p>
+
+    </div>
+
+</main>
+
+
+<script src="/js/auth.js"></script>
 
 </body>
+
 </html>
