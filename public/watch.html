@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Watch — D-Videos</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="header-inner">
+
+            <a href="/" class="site-logo">
+                <span>D</span>
+                D-Videos
+            </a>
+
+            <nav class="main-nav">
+                <a href="/">Home</a>
+                <a href="/upload.html">Upload</a>
+            </nav>
+
+            <div class="header-account" id="headerAccount">
+                <a href="/login.html" class="nav-button">
+                    Sign in
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+
+    <main class="watch-page">
+
+        <div id="watchError" class="watch-error" hidden></div>
+
+        <section id="videoContainer" hidden>
+
+            <div class="video-player-wrapper">
+
+                <iframe
+                    id="youtubePlayer"
+                    title="D-Videos video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen>
+                </iframe>
+
+            </div>
+
+
+            <div class="video-info">
+
+                <h1 id="videoTitle">
+                    Loading...
+                </h1>
+
+                <div class="video-meta">
+
+                    <span id="videoUploader">
+                        Loading...
+                    </span>
+
+                    <span>•</span>
+
+                    <span id="videoDate">
+                        Loading...
+                    </span>
+
+                </div>
+
+
+                <div class="video-description" id="videoDescription">
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section id="loadingState" class="watch-loading">
+
+            <div class="loading-spinner"></div>
+
+            <p>Loading video...</p>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        const videoContainer =
+            document.getElementById("videoContainer");
+
+        const loadingState =
+            document.getElementById("loadingState");
+
+        const errorBox =
+            document.getElementById("watchError");
+
+        const player =
+            document.getElementById("youtubePlayer");
+
+        const title =
+            document.getElementById("videoTitle");
+
+        const uploader =
+            document.getElementById("videoUploader");
+
+        const date =
+            document.getElementById("videoDate");
+
+        const description =
+            document.getElementById("videoDescription");
+
+
+        function showError(message) {
+
+            loadingState.hidden = true;
+
+            errorBox.textContent = message;
+
+            errorBox.hidden = false;
+        }
+
+
+        function escapeHTML(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                value || "";
+
+            return div.innerHTML;
+        }
+
+
+        async function loadVideo() {
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            const videoId =
+                params.get("id");
+
+
+            if (!videoId) {
+
+                return showError(
+                    "No video was specified."
+                );
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/api/videos/${encodeURIComponent(videoId)}`
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Video could not be found."
+                    );
+                }
+
+
+                const video =
+                    data.video;
+
+
+                title.textContent =
+                    video.title;
+
+
+                uploader.textContent =
+                    `@${video.uploader}`;
+
+
+                if (video.created_at) {
+
+                    const created =
+                        new Date(
+                            video.created_at
+                        );
+
+                    date.textContent =
+                        created.toLocaleDateString(
+                            undefined,
+                            {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric"
+                            }
+                        );
+                }
+
+
+                description.textContent =
+                    video.description ||
+                    "No description."
+
+
+                player.src =
+                    `https://www.youtube.com/embed/${encodeURIComponent(video.youtube_id)}`;
+
+
+                document.title =
+                    `${video.title} — D-Videos`;
+
+
+                loadingState.hidden =
+                    true;
+
+                videoContainer.hidden =
+                    false;
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showError(
+                    error.message ||
+                    "Something went wrong."
+                );
+            }
+        }
+
+
+        loadVideo();
+
+    </script>
+
+</body>
+</html>
