@@ -484,9 +484,10 @@ app.get(
                 access_type: "offline",
                 prompt: "consent",
 
-                scope: [
-                    "https://www.googleapis.com/auth/youtube.upload"
-                ],
+               scope: [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.readonly"
+],
 
                 state
             });
