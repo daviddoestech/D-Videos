@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create account — D-Videos</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="auth-page">
+
+    <main class="auth-container">
+
+        <a href="/" class="auth-logo">
+            <span>D</span>
+            D-Videos
+        </a>
+
+        <div class="auth-card">
+
+            <div class="auth-header">
+
+                <h1>Create your account</h1>
+
+                <p>
+                    Join D-Videos and start watching.
+                </p>
+
+            </div>
+
+
+            <form id="signupForm">
+
+                <label for="username">
+                    Username
+                </label>
+
+                <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Choose a username"
+                    autocomplete="username"
+                    required
+                >
+
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    required
+                >
+
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="At least 8 characters"
+                    autocomplete="new-password"
+                    required
+                >
+
+
+                <div
+                    class="auth-error"
+                    id="signupError"
+                    hidden
+                ></div>
+
+
+                <button
+                    type="submit"
+                    class="auth-submit"
+                    id="signupButton"
+                >
+                    Create account
+                </button>
+
+            </form>
+
+
+            <p class="auth-switch">
+                Already have an account?
+
+                <a href="/login.html">
+                    Sign in
+                </a>
+            </p>
+
+        </div>
+
+    </main>
+
+
+    <script src="/js/auth.js"></script>
+
+</body>
+</html>

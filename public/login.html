@@ -1,0 +1,79 @@
+const signupForm = document.getElementById("signupForm");
+
+if (signupForm) {
+
+    signupForm.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        const username =
+            document.getElementById("username").value.trim();
+
+        const email =
+            document.getElementById("email").value.trim();
+
+        const password =
+            document.getElementById("password").value;
+
+        const errorBox =
+            document.getElementById("signupError");
+
+        const button =
+            document.getElementById("signupButton");
+
+
+        errorBox.hidden = true;
+
+        button.disabled = true;
+
+        button.textContent = "Creating account...";
+
+
+        try {
+
+            const response = await fetch(
+                "/api/auth/signup",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password
+                    })
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error || "Could not create account."
+                );
+            }
+
+
+            // Account created + session established
+            window.location.href = "/";
+
+        } catch (error) {
+
+            errorBox.textContent = error.message;
+
+            errorBox.hidden = false;
+
+            button.disabled = false;
+
+            button.textContent = "Create account";
+
+        }
+
+    });
+
+}

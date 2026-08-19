@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>D-Videos</title>
+
+    <meta
+        name="description"
+        content="D-Videos — discover, watch and share videos."
+    >
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <!-- TOP NAVIGATION -->
+    <header class="navbar">
+
+        <div class="nav-left">
+
+            <button
+                class="icon-button menu-toggle"
+                id="menuToggle"
+                aria-label="Toggle navigation"
+            >
+                ☰
+            </button>
+
+            <a href="/" class="brand">
+
+                <div class="brand-mark">
+                    D
+                </div>
+
+                <div class="brand-text">
+                    <strong>D-Videos</strong>
+                    <span>Watch something.</span>
+                </div>
+
+            </a>
+
+        </div>
+
+
+        <form class="search-box" id="searchForm">
+
+            <input
+                id="searchInput"
+                type="search"
+                placeholder="Search videos..."
+                autocomplete="off"
+            >
+
+            <button
+                type="submit"
+                aria-label="Search"
+            >
+                <span>⌕</span>
+            </button>
+
+        </form>
+
+
+        <div class="nav-actions">
+
+            <a
+                href="/upload.html"
+                class="upload-btn"
+            >
+                <span>＋</span>
+                Upload
+            </a>
+
+            <a
+                href="/login.html"
+                class="profile-button"
+                id="profileButton"
+            >
+                Sign in
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <nav class="main-navigation">
+
+            <a href="/" class="nav-item active">
+
+                <span class="nav-icon">⌂</span>
+
+                <span>Home</span>
+
+            </a>
+
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">✦</span>
+
+                <span>Discover</span>
+
+            </a>
+
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">↗</span>
+
+                <span>Trending</span>
+
+            </a>
+
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">▣</span>
+
+                <span>Subscriptions</span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-divider"></div>
+
+
+        <div class="sidebar-section">
+
+            <p class="sidebar-title">
+                Your space
+            </p>
+
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">◷</span>
+
+                <span>History</span>
+
+            </a>
+
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">♡</span>
+
+                <span>Liked videos</span>
+
+            </a>
+
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">▱</span>
+
+                <span>Watch later</span>
+
+            </a>
+
+        </div>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="mini-promo">
+
+                <div class="promo-icon">
+                    D
+                </div>
+
+                <div>
+                    <strong>Welcome to D-Videos</strong>
+
+                    <p>
+                        Your videos. Your space.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+
+        <!-- HERO -->
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <span class="eyebrow">
+                    D-VIDEOS
+                </span>
+
+                <h1>
+                    Find something
+                    <span>worth watching.</span>
+                </h1>
+
+                <p>
+                    Discover videos from creators, explore new ideas,
+                    and share your own world with D-Videos.
+                </p>
+
+                <div class="hero-actions">
+
+                    <a
+                        href="/upload.html"
+                        class="primary-button"
+                    >
+                        Upload a video
+                    </a>
+
+                    <a
+                        href="#videos"
+                        class="secondary-button"
+                    >
+                        Explore videos
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="hero-art">
+
+                <div class="floating-card card-one">
+                    ▶
+                </div>
+
+                <div class="floating-card card-two">
+                    <span>LIVE</span>
+                </div>
+
+                <div class="floating-card card-three">
+                    ✦
+                </div>
+
+                <div class="hero-orb"></div>
+
+                <div class="hero-logo">
+                    D
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CATEGORY BAR -->
+        <section class="category-section">
+
+            <div class="category-scroll">
+
+                <button class="category active">
+                    All
+                </button>
+
+                <button class="category">
+                    Technology
+                </button>
+
+                <button class="category">
+                    Gaming
+                </button>
+
+                <button class="category">
+                    Music
+                </button>
+
+                <button class="category">
+                    Entertainment
+                </button>
+
+                <button class="category">
+                    Education
+                </button>
+
+                <button class="category">
+                    Science
+                </button>
+
+                <button class="category">
+                    News
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- VIDEO SECTION -->
+        <section
+            class="video-section"
+            id="videos"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="section-label">
+                        FOR YOU
+                    </span>
+
+                    <h2>
+                        Fresh videos
+                    </h2>
+                </div>
+
+                <button
+                    class="refresh-button"
+                    id="refreshVideos"
+                >
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+
+            <div
+                class="video-grid"
+                id="videoGrid"
+            >
+
+                <!-- VIDEO 1 -->
+                <article
+                    class="video-card"
+                    data-category="Technology"
+                    data-title="Building something awesome"
+                >
+
+                    <a
+                        href="/watch.html?id=demo1"
+                        class="thumbnail"
+                    >
+
+                        <div class="thumbnail-art art-green">
+                            <span>D</span>
+                        </div>
+
+                        <span class="duration">
+                            8:42
+                        </span>
+
+                    </a>
+
+
+                    <div class="video-details">
+
+                        <div class="avatar">
+                            D
+                        </div>
+
+                        <div class="video-text">
+
+                            <h3>
+                                Building something awesome
+                            </h3>
+
+                            <a
+                                href="/channel.html?user=david"
+                                class="creator"
+                            >
+                                David Does Tech
+                            </a>
+
+                            <p>
+                                1.2K views · 2 hours ago
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="more-button"
+                            aria-label="More options"
+                        >
+                            ⋮
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- VIDEO 2 -->
+                <article
+                    class="video-card"
+                    data-category="Gaming"
+                    data-title="The game I wasn't expecting"
+                >
+
+                    <a
+                        href="/watch.html?id=demo2"
+                        class="thumbnail"
+                    >
+
+                        <div class="thumbnail-art art-purple">
+                            <span>GAME</span>
+                        </div>
+
+                        <span class="duration">
+                            14:27
+                        </span>
+
+                    </a>
+
+
+                    <div class="video-details">
+
+                        <div class="avatar purple">
+                            G
+                        </div>
+
+                        <div class="video-text">
+
+                            <h3>
+                                The game I wasn't expecting
+                            </h3>
+
+                            <a
+                                href="/channel.html?user=gaming"
+                                class="creator"
+                            >
+                                GameLab
+                            </a>
+
+                            <p>
+                                842 views · 5 hours ago
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="more-button"
+                            aria-label="More options"
+                        >
+                            ⋮
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- VIDEO 3 -->
+                <article
+                    class="video-card"
+                    data-category="Music"
+                    data-title="Midnight — Original Song"
+                >
+
+                    <a
+                        href="/watch.html?id=demo3"
+                        class="thumbnail"
+                    >
+
+                        <div class="thumbnail-art art-blue">
+                            <span>♫</span>
+                        </div>
+
+                        <span class="duration">
+                            3:51
+                        </span>
+
+                    </a>
+
+
+                    <div class="video-details">
+
+                        <div class="avatar blue">
+                            M
+                        </div>
+
+                        <div class="video-text">
+
+                            <h3>
+                                Midnight — Original Song
+                            </h3>
+
+                            <a
+                                href="/channel.html?user=music"
+                                class="creator"
+                            >
+                                D-Music
+                            </a>
+
+                            <p>
+                                3.8K views · 1 day ago
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="more-button"
+                            aria-label="More options"
+                        >
+                            ⋮
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- VIDEO 4 -->
+                <article
+                    class="video-card"
+                    data-category="Education"
+                    data-title="How computers actually work"
+                >
+
+                    <a
+                        href="/watch.html?id=demo4"
+                        class="thumbnail"
+                    >
+
+                        <div class="thumbnail-art art-orange">
+                            <span>101</span>
+                        </div>
+
+                        <span class="duration">
+                            11:03
+                        </span>
+
+                    </a>
+
+
+                    <div class="video-details">
+
+                        <div class="avatar orange">
+                            T
+                        </div>
+
+                        <div class="video-text">
+
+                            <h3>
+                                How computers actually work
+                            </h3>
+
+                            <a
+                                href="/channel.html?user=tech"
+                                class="creator"
+                            >
+                                Tech Explained
+                            </a>
+
+                            <p>
+                                2.4K views · 2 days ago
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="more-button"
+                            aria-label="More options"
+                        >
+                            ⋮
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- VIDEO 5 -->
+                <article
+                    class="video-card"
+                    data-category="Technology"
+                    data-title="I built a server at home"
+                >
+
+                    <a
+                        href="/watch.html?id=demo5"
+                        class="thumbnail"
+                    >
+
+                        <div class="thumbnail-art art-red">
+                            <span>SERVER</span>
+                        </div>
+
+                        <span class="duration">
+                            17:20
+                        </span>
+
+                    </a>
+
+
+                    <div class="video-details">
+
+                        <div class="avatar red">
+                            S
+                        </div>
+
+                        <div class="video-text">
+
+                            <h3>
+                                I built a server at home
+                            </h3>
+
+                            <a
+                                href="/channel.html?user=server"
+                                class="creator"
+                            >
+                                ServerStuff
+                            </a>
+
+                            <p>
+                                672 views · 3 days ago
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="more-button"
+                            aria-label="More options"
+                        >
+                            ⋮
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+                <!-- VIDEO 6 -->
+                <article
+                    class="video-card"
+                    data-category="Entertainment"
+                    data-title="Things that make absolutely no sense"
+                >
+
+                    <a
+                        href="/watch.html?id=demo6"
+                        class="thumbnail"
+                    >
+
+                        <div class="thumbnail-art art-pink">
+                            <span>LOL</span>
+                        </div>
+
+                        <span class="duration">
+                            6:19
+                        </span>
+
+                    </a>
+
+
+                    <div class="video-details">
+
+                        <div class="avatar pink">
+                            L
+                        </div>
+
+                        <div class="video-text">
+
+                            <h3>
+                                Things that make absolutely no sense
+                            </h3>
+
+                            <a
+                                href="/channel.html?user=lol"
+                                class="creator"
+                            >
+                                LOL Factory
+                            </a>
+
+                            <p>
+                                18K views · 4 days ago
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="more-button"
+                            aria-label="More options"
+                        >
+                            ⋮
+                        </button>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+
+            <div
+                class="no-results"
+                id="noResults"
+                hidden
+            >
+                <div class="no-results-icon">
+                    ?
+                </div>
+
+                <h3>
+                    Nothing found
+                </h3>
+
+                <p>
+                    Try searching for something else.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- FOOTER -->
+        <footer class="footer">
+
+            <div class="footer-brand">
+                <div class="small-logo">D</div>
+                <strong>D-Videos</strong>
+            </div>
+
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Terms</a>
+                <a href="#">Privacy</a>
+                <a href="#">Help</a>
+            </div>
+
+            <span class="copyright">
+                © 2026 D-Videos
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <script src="/js/app.js"></script>
+
+</body>
+</html>
