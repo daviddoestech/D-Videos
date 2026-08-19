@@ -27,18 +27,23 @@
     </a>
 
     <div class="account-area" id="accountArea">
+
         <a
             href="/login.html"
             class="nav-button secondary"
         >
             Sign in
         </a>
+
     </div>
 
 </header>
 
 
 <main class="upload-page">
+
+
+    <!-- PAGE HEADER -->
 
     <div class="upload-header">
 
@@ -64,13 +69,15 @@
         <div class="upload-card-header">
 
             <div>
+
                 <h2>
-                    D-Videos YouTube channel
+                    Linked YouTube channel
                 </h2>
 
                 <p id="youtubeStatus">
                     Checking connection...
                 </p>
+
             </div>
 
             <div
@@ -105,13 +112,14 @@
         >
 
 
-            <!-- FILE -->
+            <!-- VIDEO FILE -->
 
             <div class="upload-field">
 
                 <label>
                     Video
                 </label>
+
 
                 <label
                     for="video"
@@ -136,6 +144,7 @@
                     </span>
 
                 </label>
+
 
                 <input
                     id="video"
@@ -258,6 +267,7 @@
 
                 </div>
 
+
                 <div class="upload-progress">
 
                     <div
@@ -281,10 +291,10 @@
             </button>
 
 
+            <!-- NOTE -->
+
             <p class="upload-note">
-                Your video will be uploaded to the
-                official D-Videos YouTube channel
-                and added to D-Videos.
+                Your video will be uploaded to the linked YouTube channel as an unlisted video and added to D-Videos.
             </p>
 
         </form>
@@ -312,6 +322,7 @@
             Your video is now on D-Videos.
         </p>
 
+
         <div class="success-actions">
 
             <a
@@ -337,6 +348,10 @@
 
 
 <script>
+
+// ============================================================
+// ELEMENTS
+// ============================================================
 
 const uploadForm =
     document.getElementById(
@@ -435,6 +450,7 @@ async function checkUser() {
         const data =
             await response.json();
 
+
         if (!data.loggedIn) {
 
             window.location.href =
@@ -442,6 +458,7 @@ async function checkUser() {
 
             return false;
         }
+
 
         document.getElementById(
             "accountArea"
@@ -462,6 +479,7 @@ async function checkUser() {
 
         `;
 
+
         document
             .getElementById(
                 "logoutButton"
@@ -471,9 +489,15 @@ async function checkUser() {
                 logout
             );
 
+
         return true;
 
     } catch (error) {
+
+        console.error(
+            "Login check failed:",
+            error
+        );
 
         window.location.href =
             "/login.html";
@@ -496,20 +520,25 @@ async function checkYouTube() {
                 "/api/youtube/status"
             );
 
+
         const data =
             await response.json();
+
 
         if (data.connected) {
 
             youtubeStatus.textContent =
                 `Connected to ${data.channel.title}`;
 
+
             youtubeDot.classList.add(
                 "connected"
             );
 
+
             youtubeConnect.textContent =
                 "YouTube connected ✓";
+
 
             youtubeConnect.classList.add(
                 "connected"
@@ -518,7 +547,8 @@ async function checkYouTube() {
         } else {
 
             youtubeStatus.textContent =
-                "Connect the official D-Videos YouTube channel before uploading.";
+                "Connect a YouTube channel before uploading.";
+
 
             youtubeConnect.textContent =
                 "Connect YouTube";
@@ -527,9 +557,13 @@ async function checkYouTube() {
 
     } catch (error) {
 
+        console.error(
+            "YouTube status error:",
+            error
+        );
+
         youtubeStatus.textContent =
             "Could not check YouTube connection.";
-
     }
 }
 
@@ -547,23 +581,32 @@ videoInput.addEventListener(
             selectedFile.textContent =
                 "No file selected";
 
+            dropZone.classList.remove(
+                "has-file"
+            );
+
             return;
         }
 
+
         const file =
             videoInput.files[0];
+
 
         const size =
             formatBytes(
                 file.size
             );
 
+
         selectedFile.textContent =
             `${file.name} • ${size}`;
+
 
         dropZone.classList.add(
             "has-file"
         );
+
     }
 );
 
@@ -585,6 +628,7 @@ dropZone.addEventListener(
     }
 );
 
+
 dropZone.addEventListener(
     "dragleave",
     () => {
@@ -596,6 +640,7 @@ dropZone.addEventListener(
     }
 );
 
+
 dropZone.addEventListener(
     "drop",
     event => {
@@ -606,25 +651,58 @@ dropZone.addEventListener(
             "dragging"
         );
 
+
         const files =
             event.dataTransfer.files;
+
 
         if (!files.length) {
             return;
         }
 
-        videoInput.files =
-            files;
+
+        if (
+            !files[0].type.startsWith(
+                "video/"
+            )
+        ) {
+
+            showError(
+                "Please choose a video file."
+            );
+
+            return;
+        }
+
+
+        try {
+
+            videoInput.files =
+                files;
+
+        } catch (error) {
+
+            console.error(
+                "Could not assign dropped file:",
+                error
+            );
+
+            return;
+        }
+
 
         videoInput.dispatchEvent(
-            new Event("change")
+            new Event(
+                "change"
+            )
         );
+
     }
 );
 
 
 // ============================================================
-// UPLOAD
+// UPLOAD FORM
 // ============================================================
 
 uploadForm.addEventListener(
@@ -639,9 +717,15 @@ uploadForm.addEventListener(
 );
 
 
+// ============================================================
+// UPLOAD VIDEO
+// ============================================================
+
 function uploadVideo() {
 
-    uploadError.hidden = true;
+    uploadError.hidden =
+        true;
+
 
     if (!videoInput.files.length) {
 
@@ -652,22 +736,28 @@ function uploadVideo() {
         return;
     }
 
+
     const formData =
         new FormData(
             uploadForm
         );
 
+
     uploadButton.disabled =
         true;
+
 
     uploadButton.textContent =
         "Uploading...";
 
+
     progressContainer.hidden =
         false;
 
+
     progressBar.style.width =
         "0%";
+
 
     progressText.textContent =
         "0%";
@@ -676,11 +766,16 @@ function uploadVideo() {
     const xhr =
         new XMLHttpRequest();
 
+
     xhr.open(
         "POST",
         "/api/videos/upload"
     );
 
+
+    // ========================================================
+    // UPLOAD PROGRESS
+    // ========================================================
 
     xhr.upload.addEventListener(
         "progress",
@@ -690,27 +785,37 @@ function uploadVideo() {
                 return;
             }
 
+
             const percent =
                 Math.round(
-                    (event.loaded /
-                        event.total) *
-                    100
+                    (
+                        event.loaded /
+                        event.total
+                    ) * 100
                 );
+
 
             progressBar.style.width =
                 `${percent}%`;
 
+
             progressText.textContent =
                 `${percent}%`;
+
         }
     );
 
+
+    // ========================================================
+    // UPLOAD COMPLETE
+    // ========================================================
 
     xhr.addEventListener(
         "load",
         () => {
 
             let data;
+
 
             try {
 
@@ -725,6 +830,7 @@ function uploadVideo() {
                     error:
                         "The server returned an invalid response."
                 };
+
             }
 
 
@@ -738,6 +844,7 @@ function uploadVideo() {
                     "Upload failed."
                 );
 
+
                 resetUploadButton();
 
                 return;
@@ -747,12 +854,14 @@ function uploadVideo() {
             progressBar.style.width =
                 "100%";
 
+
             progressText.textContent =
                 "100%";
 
 
             uploadSection.hidden =
                 true;
+
 
             uploadSuccess.hidden =
                 false;
@@ -769,6 +878,10 @@ function uploadVideo() {
     );
 
 
+    // ========================================================
+    // NETWORK ERROR
+    // ========================================================
+
     xhr.addEventListener(
         "error",
         () => {
@@ -776,6 +889,26 @@ function uploadVideo() {
             showError(
                 "Network error while uploading."
             );
+
+
+            resetUploadButton();
+
+        }
+    );
+
+
+    // ========================================================
+    // REQUEST ABORTED
+    // ========================================================
+
+    xhr.addEventListener(
+        "abort",
+        () => {
+
+            showError(
+                "Upload was cancelled."
+            );
+
 
             resetUploadButton();
 
@@ -795,12 +928,24 @@ function uploadVideo() {
 
 async function logout() {
 
-    await fetch(
-        "/api/auth/logout",
-        {
-            method: "POST"
-        }
-    );
+    try {
+
+        await fetch(
+            "/api/auth/logout",
+            {
+                method: "POST"
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
+
 
     window.location.href =
         "/";
@@ -808,7 +953,7 @@ async function logout() {
 
 
 // ============================================================
-// HELPERS
+// SHOW ERROR
 // ============================================================
 
 function showError(message) {
@@ -816,26 +961,39 @@ function showError(message) {
     uploadError.textContent =
         message;
 
+
     uploadError.hidden =
         false;
+
 }
 
+
+// ============================================================
+// RESET UPLOAD BUTTON
+// ============================================================
 
 function resetUploadButton() {
 
     uploadButton.disabled =
         false;
 
+
     uploadButton.textContent =
         "Upload to D-Videos";
+
 }
 
+
+// ============================================================
+// FORMAT FILE SIZE
+// ============================================================
 
 function formatBytes(bytes) {
 
     if (bytes === 0) {
         return "0 Bytes";
     }
+
 
     const units = [
         "Bytes",
@@ -845,11 +1003,13 @@ function formatBytes(bytes) {
         "TB"
     ];
 
+
     const index =
         Math.floor(
             Math.log(bytes) /
             Math.log(1024)
         );
+
 
     return (
         parseFloat(
@@ -864,17 +1024,42 @@ function formatBytes(bytes) {
         " " +
         units[index]
     );
+
 }
 
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
 
 function escapeHtml(value) {
 
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 
@@ -888,8 +1073,11 @@ function escapeHtml(value) {
     const loggedIn =
         await checkUser();
 
+
     if (loggedIn) {
+
         await checkYouTube();
+
     }
 
 })();
