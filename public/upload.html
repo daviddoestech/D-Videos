@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Upload — D-Videos</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+</head>
+
+<body class="auth-page">
+
+<header class="topbar">
+
+    <a href="/" class="brand">
+        <span class="brand-mark">D</span>
+        <span class="brand-name">D-Videos</span>
+    </a>
+
+    <div class="account-area" id="accountArea">
+        <a
+            href="/login.html"
+            class="nav-button secondary"
+        >
+            Sign in
+        </a>
+    </div>
+
+</header>
+
+
+<main class="upload-page">
+
+    <div class="upload-header">
+
+        <span class="section-kicker">
+            D-VIDEOS CREATOR
+        </span>
+
+        <h1>
+            Upload a video
+        </h1>
+
+        <p>
+            Share something with everyone on D-Videos.
+        </p>
+
+    </div>
+
+
+    <!-- YOUTUBE CONNECTION -->
+
+    <section class="upload-card">
+
+        <div class="upload-card-header">
+
+            <div>
+                <h2>
+                    D-Videos YouTube channel
+                </h2>
+
+                <p id="youtubeStatus">
+                    Checking connection...
+                </p>
+            </div>
+
+            <div
+                class="youtube-status-dot"
+                id="youtubeDot"
+            ></div>
+
+        </div>
+
+
+        <a
+            href="/api/youtube/auth"
+            class="youtube-connect-button"
+            id="youtubeConnect"
+        >
+            Connect YouTube
+        </a>
+
+    </section>
+
+
+    <!-- UPLOAD FORM -->
+
+    <section
+        class="upload-card"
+        id="uploadSection"
+    >
+
+        <form
+            id="uploadForm"
+            enctype="multipart/form-data"
+        >
+
+
+            <!-- FILE -->
+
+            <div class="upload-field">
+
+                <label>
+                    Video
+                </label>
+
+                <label
+                    for="video"
+                    class="drop-zone"
+                    id="dropZone"
+                >
+
+                    <div class="drop-icon">
+                        ↑
+                    </div>
+
+                    <strong>
+                        Choose a video
+                    </strong>
+
+                    <span>
+                        MP4, WebM, MOV and other video files
+                    </span>
+
+                    <span id="selectedFile">
+                        No file selected
+                    </span>
+
+                </label>
+
+                <input
+                    id="video"
+                    name="video"
+                    type="file"
+                    accept="video/*"
+                    hidden
+                    required
+                >
+
+            </div>
+
+
+            <!-- TITLE -->
+
+            <div class="upload-field">
+
+                <label for="title">
+                    Title
+                </label>
+
+                <input
+                    id="title"
+                    name="title"
+                    type="text"
+                    maxlength="100"
+                    placeholder="Give your video a title"
+                    required
+                >
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="upload-field">
+
+                <label for="description">
+                    Description
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    maxlength="5000"
+                    placeholder="Tell people what your video is about..."
+                ></textarea>
+
+            </div>
+
+
+            <!-- CATEGORY -->
+
+            <div class="upload-field">
+
+                <label for="category">
+                    Category
+                </label>
+
+                <select
+                    id="category"
+                    name="category"
+                >
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                    <option value="Gaming">
+                        Gaming
+                    </option>
+
+                    <option value="Technology">
+                        Technology
+                    </option>
+
+                    <option value="Music">
+                        Music
+                    </option>
+
+                    <option value="Entertainment">
+                        Entertainment
+                    </option>
+
+                    <option value="Education">
+                        Education
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ERROR -->
+
+            <div
+                id="uploadError"
+                class="auth-error"
+                hidden
+            ></div>
+
+
+            <!-- PROGRESS -->
+
+            <div
+                id="uploadProgressContainer"
+                class="upload-progress-container"
+                hidden
+            >
+
+                <div class="upload-progress-top">
+
+                    <span>
+                        Uploading...
+                    </span>
+
+                    <span id="uploadProgressText">
+                        0%
+                    </span>
+
+                </div>
+
+                <div class="upload-progress">
+
+                    <div
+                        id="uploadProgress"
+                        class="upload-progress-bar"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTON -->
+
+            <button
+                type="submit"
+                class="upload-submit"
+                id="uploadButton"
+            >
+                Upload to D-Videos
+            </button>
+
+
+            <p class="upload-note">
+                Your video will be uploaded to the
+                official D-Videos YouTube channel
+                and added to D-Videos.
+            </p>
+
+        </form>
+
+    </section>
+
+
+    <!-- SUCCESS -->
+
+    <section
+        id="uploadSuccess"
+        class="upload-success"
+        hidden
+    >
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+        <h2>
+            Video uploaded!
+        </h2>
+
+        <p id="successText">
+            Your video is now on D-Videos.
+        </p>
+
+        <div class="success-actions">
+
+            <a
+                href="/"
+                class="hero-button primary"
+            >
+                Back to D-Videos
+            </a>
+
+            <a
+                href="#"
+                id="watchButton"
+                class="hero-button secondary"
+            >
+                Watch video
+            </a>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+const uploadForm =
+    document.getElementById(
+        "uploadForm"
+    );
+
+const videoInput =
+    document.getElementById(
+        "video"
+    );
+
+const selectedFile =
+    document.getElementById(
+        "selectedFile"
+    );
+
+const dropZone =
+    document.getElementById(
+        "dropZone"
+    );
+
+const uploadButton =
+    document.getElementById(
+        "uploadButton"
+    );
+
+const uploadError =
+    document.getElementById(
+        "uploadError"
+    );
+
+const progressContainer =
+    document.getElementById(
+        "uploadProgressContainer"
+    );
+
+const progressBar =
+    document.getElementById(
+        "uploadProgress"
+    );
+
+const progressText =
+    document.getElementById(
+        "uploadProgressText"
+    );
+
+const youtubeStatus =
+    document.getElementById(
+        "youtubeStatus"
+    );
+
+const youtubeDot =
+    document.getElementById(
+        "youtubeDot"
+    );
+
+const youtubeConnect =
+    document.getElementById(
+        "youtubeConnect"
+    );
+
+const uploadSection =
+    document.getElementById(
+        "uploadSection"
+    );
+
+const uploadSuccess =
+    document.getElementById(
+        "uploadSuccess"
+    );
+
+const successText =
+    document.getElementById(
+        "successText"
+    );
+
+const watchButton =
+    document.getElementById(
+        "watchButton"
+    );
+
+
+// ============================================================
+// CHECK LOGIN
+// ============================================================
+
+async function checkUser() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/auth/me"
+            );
+
+        const data =
+            await response.json();
+
+        if (!data.loggedIn) {
+
+            window.location.href =
+                "/login.html";
+
+            return false;
+        }
+
+        document.getElementById(
+            "accountArea"
+        ).innerHTML = `
+
+            <span class="welcome-user">
+                Hi, ${escapeHtml(
+                    data.user.username
+                )}
+            </span>
+
+            <button
+                class="nav-button secondary"
+                id="logoutButton"
+            >
+                Sign out
+            </button>
+
+        `;
+
+        document
+            .getElementById(
+                "logoutButton"
+            )
+            .addEventListener(
+                "click",
+                logout
+            );
+
+        return true;
+
+    } catch (error) {
+
+        window.location.href =
+            "/login.html";
+
+        return false;
+    }
+}
+
+
+// ============================================================
+// CHECK YOUTUBE
+// ============================================================
+
+async function checkYouTube() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/youtube/status"
+            );
+
+        const data =
+            await response.json();
+
+        if (data.connected) {
+
+            youtubeStatus.textContent =
+                `Connected to ${data.channel.title}`;
+
+            youtubeDot.classList.add(
+                "connected"
+            );
+
+            youtubeConnect.textContent =
+                "YouTube connected ✓";
+
+            youtubeConnect.classList.add(
+                "connected"
+            );
+
+        } else {
+
+            youtubeStatus.textContent =
+                "Connect the official D-Videos YouTube channel before uploading.";
+
+            youtubeConnect.textContent =
+                "Connect YouTube";
+
+        }
+
+    } catch (error) {
+
+        youtubeStatus.textContent =
+            "Could not check YouTube connection.";
+
+    }
+}
+
+
+// ============================================================
+// FILE SELECTION
+// ============================================================
+
+videoInput.addEventListener(
+    "change",
+    () => {
+
+        if (!videoInput.files.length) {
+
+            selectedFile.textContent =
+                "No file selected";
+
+            return;
+        }
+
+        const file =
+            videoInput.files[0];
+
+        const size =
+            formatBytes(
+                file.size
+            );
+
+        selectedFile.textContent =
+            `${file.name} • ${size}`;
+
+        dropZone.classList.add(
+            "has-file"
+        );
+    }
+);
+
+
+// ============================================================
+// DRAG & DROP
+// ============================================================
+
+dropZone.addEventListener(
+    "dragover",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.add(
+            "dragging"
+        );
+
+    }
+);
+
+dropZone.addEventListener(
+    "dragleave",
+    () => {
+
+        dropZone.classList.remove(
+            "dragging"
+        );
+
+    }
+);
+
+dropZone.addEventListener(
+    "drop",
+    event => {
+
+        event.preventDefault();
+
+        dropZone.classList.remove(
+            "dragging"
+        );
+
+        const files =
+            event.dataTransfer.files;
+
+        if (!files.length) {
+            return;
+        }
+
+        videoInput.files =
+            files;
+
+        videoInput.dispatchEvent(
+            new Event("change")
+        );
+    }
+);
+
+
+// ============================================================
+// UPLOAD
+// ============================================================
+
+uploadForm.addEventListener(
+    "submit",
+    event => {
+
+        event.preventDefault();
+
+        uploadVideo();
+
+    }
+);
+
+
+function uploadVideo() {
+
+    uploadError.hidden = true;
+
+    if (!videoInput.files.length) {
+
+        showError(
+            "Choose a video first."
+        );
+
+        return;
+    }
+
+    const formData =
+        new FormData(
+            uploadForm
+        );
+
+    uploadButton.disabled =
+        true;
+
+    uploadButton.textContent =
+        "Uploading...";
+
+    progressContainer.hidden =
+        false;
+
+    progressBar.style.width =
+        "0%";
+
+    progressText.textContent =
+        "0%";
+
+
+    const xhr =
+        new XMLHttpRequest();
+
+    xhr.open(
+        "POST",
+        "/api/videos/upload"
+    );
+
+
+    xhr.upload.addEventListener(
+        "progress",
+        event => {
+
+            if (!event.lengthComputable) {
+                return;
+            }
+
+            const percent =
+                Math.round(
+                    (event.loaded /
+                        event.total) *
+                    100
+                );
+
+            progressBar.style.width =
+                `${percent}%`;
+
+            progressText.textContent =
+                `${percent}%`;
+        }
+    );
+
+
+    xhr.addEventListener(
+        "load",
+        () => {
+
+            let data;
+
+            try {
+
+                data =
+                    JSON.parse(
+                        xhr.responseText
+                    );
+
+            } catch {
+
+                data = {
+                    error:
+                        "The server returned an invalid response."
+                };
+            }
+
+
+            if (
+                xhr.status < 200 ||
+                xhr.status >= 300
+            ) {
+
+                showError(
+                    data.error ||
+                    "Upload failed."
+                );
+
+                resetUploadButton();
+
+                return;
+            }
+
+
+            progressBar.style.width =
+                "100%";
+
+            progressText.textContent =
+                "100%";
+
+
+            uploadSection.hidden =
+                true;
+
+            uploadSuccess.hidden =
+                false;
+
+
+            successText.textContent =
+                `"${data.title}" was uploaded successfully.`;
+
+
+            watchButton.href =
+                `/watch.html?id=${data.id}`;
+
+        }
+    );
+
+
+    xhr.addEventListener(
+        "error",
+        () => {
+
+            showError(
+                "Network error while uploading."
+            );
+
+            resetUploadButton();
+
+        }
+    );
+
+
+    xhr.send(
+        formData
+    );
+}
+
+
+// ============================================================
+// LOGOUT
+// ============================================================
+
+async function logout() {
+
+    await fetch(
+        "/api/auth/logout",
+        {
+            method: "POST"
+        }
+    );
+
+    window.location.href =
+        "/";
+}
+
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function showError(message) {
+
+    uploadError.textContent =
+        message;
+
+    uploadError.hidden =
+        false;
+}
+
+
+function resetUploadButton() {
+
+    uploadButton.disabled =
+        false;
+
+    uploadButton.textContent =
+        "Upload to D-Videos";
+}
+
+
+function formatBytes(bytes) {
+
+    if (bytes === 0) {
+        return "0 Bytes";
+    }
+
+    const units = [
+        "Bytes",
+        "KB",
+        "MB",
+        "GB",
+        "TB"
+    ];
+
+    const index =
+        Math.floor(
+            Math.log(bytes) /
+            Math.log(1024)
+        );
+
+    return (
+        parseFloat(
+            (
+                bytes /
+                Math.pow(
+                    1024,
+                    index
+                )
+            ).toFixed(2)
+        ) +
+        " " +
+        units[index]
+    );
+}
+
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+// ============================================================
+// START
+// ============================================================
+
+(async () => {
+
+    const loggedIn =
+        await checkUser();
+
+    if (loggedIn) {
+        await checkYouTube();
+    }
+
+})();
+
+</script>
+
+</body>
+</html>
