@@ -11,27 +11,21 @@ const crypto = require("crypto");
 require("dotenv").config();
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
-
-/* =========================================================
-   BASIC CONFIG
-   ========================================================= */
 
 app.set("trust proxy", 1);
 
-app.disable("x-powered-by");
+// ============================================================
+// DATABASE
+// ============================================================
 
-/* =========================================================
-   DATABASE
-   ========================================================= */
-
-const dbPath = path.join(__dirname, "database.db");
-
-const db = new Database(dbPath);
+const db = new Database(
+    path.join(__dirname, "database.db")
+);
 
 db.pragma("journal_mode = WAL");
 
+// USERS
 db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,6 +36,7 @@ db.prepare(`
     )
 `).run();
 
+// YOUTUBE AUTH
 db.prepare(`
     CREATE TABLE IF NOT EXISTS youtube_auth (
         id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -52,6 +47,7 @@ db.prepare(`
     )
 `).run();
 
+// VIDEOS
 db.prepare(`
     CREATE TABLE IF NOT EXISTS videos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,16 +58,15 @@ db.prepare(`
         category TEXT DEFAULT 'Other',
         uploader_id INTEGER NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (uploader_id)
-            REFERENCES users(id)
+        FOREIGN KEY (uploader_id) REFERENCES users(id)
     )
 `).run();
 
 console.log("Database ready.");
 
-/* =========================================================
-   TEMP UPLOAD DIRECTORY
-   ========================================================= */
+// ============================================================
+// TEMP UPLOADS
+// ============================================================
 
 const tempDir = path.join(__dirname, "temp");
 
@@ -81,27 +76,28 @@ if (!fs.existsSync(tempDir)) {
     });
 }
 
-/* =========================================================
-   MULTER
-   ========================================================= */
+// ============================================================
+// MULTER
+// ============================================================
 
 const upload = multer({
-
     dest: tempDir,
 
     limits: {
-        fileSize: 5 * 1024 * 1024 * 1024
+        fileSize:
+            5 * 1024 * 1024 * 1024
     },
 
-    fileFilter: (req, file, cb) => {
+    fileFilter: (
+        req,
+        file,
+        cb
+    ) => {
 
-        if (!file.mimetype) {
-            return cb(
-                new Error("Invalid video file.")
-            );
-        }
-
-        if (!file.mimetype.startsWith("video/")) {
+        if (
+            !file.mimetype ||
+            !file.mimetype.startsWith("video/")
+        ) {
             return cb(
                 new Error(
                     "Only video files are allowed."
@@ -113,9 +109,9 @@ const upload = multer({
     }
 });
 
-/* =========================================================
-   MIDDLEWARE
-   ========================================================= */
+// ============================================================
+// MIDDLEWARE
+// ============================================================
 
 app.use(
     express.json({
@@ -130,37 +126,24 @@ app.use(
     })
 );
 
-/*
-   IMPORTANT:
-
-   If you're deploying on Render, set:
-
-   SESSION_SECRET=some-long-random-secret
-
-   in your Render environment variables.
-*/
-
 app.use(
     session({
-
         secret:
             process.env.SESSION_SECRET ||
-            "CHANGE-THIS-SESSION-SECRET",
+            "development-secret-change-this",
 
         resave: false,
 
         saveUninitialized: false,
 
-        proxy: true,
-
         cookie: {
-
             httpOnly: true,
 
             sameSite: "lax",
 
             secure:
-                process.env.NODE_ENV === "production",
+                process.env.NODE_ENV ===
+                "production",
 
             maxAge:
                 1000 *
@@ -172,21 +155,25 @@ app.use(
     })
 );
 
-/* =========================================================
-   STATIC PUBLIC FILES
-   ========================================================= */
-
+// Serve /public
 app.use(
     express.static(
-        path.join(__dirname, "public")
+        path.join(
+            __dirname,
+            "public"
+        )
     )
 );
 
-/* =========================================================
-   HELPERS
-   ========================================================= */
+// ============================================================
+// HELPERS
+// ============================================================
 
-function requireLogin(req, res, next) {
+function requireLogin(
+    req,
+    res,
+    next
+) {
 
     if (!req.session.userId) {
 
@@ -200,16 +187,15 @@ function requireLogin(req, res, next) {
 }
 
 
-/* =========================================================
-   YOUTUBE CLIENT
-   ========================================================= */
+// ============================================================
+// YOUTUBE CLIENT
+// ============================================================
 
 function getYouTubeClient() {
 
     const auth =
         db.prepare(`
-            SELECT
-                refresh_token
+            SELECT refresh_token
             FROM youtube_auth
             WHERE id = 1
         `).get();
@@ -218,25 +204,10 @@ function getYouTubeClient() {
         return null;
     }
 
-    if (
-        !process.env.GOOGLE_CLIENT_ID ||
-        !process.env.GOOGLE_CLIENT_SECRET ||
-        !process.env.GOOGLE_REDIRECT_URI
-    ) {
-        console.error(
-            "Google OAuth environment variables are missing."
-        );
-
-        return null;
-    }
-
     const client =
         new google.auth.OAuth2(
-
             process.env.GOOGLE_CLIENT_ID,
-
             process.env.GOOGLE_CLIENT_SECRET,
-
             process.env.GOOGLE_REDIRECT_URI
         );
 
@@ -248,6 +219,10 @@ function getYouTubeClient() {
     return client;
 }
 
+
+// ============================================================
+// YOUTUBE API
+// ============================================================
 
 function getYouTubeAPI() {
 
@@ -265,62 +240,39 @@ function getYouTubeAPI() {
 }
 
 
-/* =========================================================
-   HEALTH
-   ========================================================= */
+// ============================================================
+// HEALTH
+// ============================================================
 
 app.get(
     "/api/health",
     (req, res) => {
 
         res.json({
-
             status: "online",
 
-            service: "D-Videos",
+            service:
+                "D-Videos",
 
-            database: "connected",
-
-            timestamp:
-                new Date().toISOString()
-
+            database:
+                "connected"
         });
+
     }
 );
 
 
-/* =========================================================
-   ROOT
-   ========================================================= */
-
-app.get(
-    "/api",
-    (req, res) => {
-
-        res.json({
-
-            service: "D-Videos",
-
-            status: "online",
-
-            endpoints: [
-                "/api/health",
-                "/api/auth/me",
-                "/api/videos"
-            ]
-
-        });
-    }
-);
-
-
-/* =========================================================
-   SIGN UP
-   ========================================================= */
+// ============================================================
+// SIGNUP
+// ============================================================
 
 app.post(
     "/api/auth/signup",
-    async (req, res) => {
+
+    async (
+        req,
+        res
+    ) => {
 
         try {
 
@@ -343,11 +295,14 @@ app.post(
             }
 
             const cleanUsername =
-                String(username)
-                    .trim();
+                String(
+                    username
+                ).trim();
 
             const cleanEmail =
-                String(email)
+                String(
+                    email
+                )
                     .trim()
                     .toLowerCase();
 
@@ -358,16 +313,6 @@ app.post(
                 return res.status(400).json({
                     error:
                         "Username must be at least 3 characters."
-                });
-            }
-
-            if (
-                cleanUsername.length > 30
-            ) {
-
-                return res.status(400).json({
-                    error:
-                        "Username must be 30 characters or less."
                 });
             }
 
@@ -427,10 +372,10 @@ app.post(
 
             res.json({
 
-                success: true,
+                success:
+                    true,
 
                 user: {
-
                     id:
                         Number(
                             result.lastInsertRowid
@@ -438,7 +383,6 @@ app.post(
 
                     username:
                         cleanUsername
-
                 }
 
             });
@@ -446,7 +390,7 @@ app.post(
         } catch (error) {
 
             console.error(
-                "Signup error:",
+                "SIGNUP ERROR:",
                 error
             );
 
@@ -459,13 +403,17 @@ app.post(
 );
 
 
-/* =========================================================
-   LOGIN
-   ========================================================= */
+// ============================================================
+// LOGIN
+// ============================================================
 
 app.post(
     "/api/auth/login",
-    async (req, res) => {
+
+    async (
+        req,
+        res
+    ) => {
 
         try {
 
@@ -486,7 +434,9 @@ app.post(
             }
 
             const cleanEmail =
-                String(email)
+                String(
+                    email
+                )
                     .trim()
                     .toLowerCase();
 
@@ -524,44 +474,27 @@ app.post(
             req.session.userId =
                 user.id;
 
-            req.session.save(
-                error => {
+            res.json({
 
-                    if (error) {
+                success:
+                    true,
 
-                        console.error(
-                            "Session save error:",
-                            error
-                        );
+                user: {
 
-                        return res.status(500).json({
-                            error:
-                                "Could not create login session."
-                        });
-                    }
+                    id:
+                        user.id,
 
-                    res.json({
+                    username:
+                        user.username
 
-                        success: true,
-
-                        user: {
-
-                            id:
-                                user.id,
-
-                            username:
-                                user.username
-
-                        }
-
-                    });
                 }
-            );
+
+            });
 
         } catch (error) {
 
             console.error(
-                "Login error:",
+                "LOGIN ERROR:",
                 error
             );
 
@@ -574,18 +507,23 @@ app.post(
 );
 
 
-/* =========================================================
-   CURRENT USER
-   ========================================================= */
+// ============================================================
+// CURRENT USER
+// ============================================================
 
 app.get(
     "/api/auth/me",
-    (req, res) => {
+
+    (
+        req,
+        res
+    ) => {
 
         if (!req.session.userId) {
 
             return res.json({
-                loggedIn: false
+                loggedIn:
+                    false
             });
         }
 
@@ -609,28 +547,35 @@ app.get(
             );
 
             return res.json({
-                loggedIn: false
+                loggedIn:
+                    false
             });
         }
 
         res.json({
 
-            loggedIn: true,
+            loggedIn:
+                true,
 
             user
 
         });
+
     }
 );
 
 
-/* =========================================================
-   LOGOUT
-   ========================================================= */
+// ============================================================
+// LOGOUT
+// ============================================================
 
 app.post(
     "/api/auth/logout",
-    (req, res) => {
+
+    (
+        req,
+        res
+    ) => {
 
         req.session.destroy(
             error => {
@@ -638,7 +583,7 @@ app.post(
                 if (error) {
 
                     console.error(
-                        "Logout error:",
+                        "LOGOUT ERROR:",
                         error
                     );
 
@@ -653,7 +598,8 @@ app.post(
                 );
 
                 res.json({
-                    success: true
+                    success:
+                        true
                 });
             }
         );
@@ -661,14 +607,19 @@ app.post(
 );
 
 
-/* =========================================================
-   YOUTUBE OAUTH START
-   ========================================================= */
+// ============================================================
+// YOUTUBE OAUTH START
+// ============================================================
 
 app.get(
     "/api/youtube/auth",
+
     requireLogin,
-    (req, res) => {
+
+    (
+        req,
+        res
+    ) => {
 
         if (
             !process.env.GOOGLE_CLIENT_ID ||
@@ -678,6 +629,27 @@ app.get(
 
             return res.status(500).send(
                 "Google OAuth environment variables are missing."
+            );
+        }
+
+        /*
+         * Delete the existing authorization first.
+         *
+         * This prevents D-Videos from accidentally
+         * continuing to use an old token with old scopes.
+         */
+        try {
+
+            db.prepare(`
+                DELETE FROM youtube_auth
+                WHERE id = 1
+            `).run();
+
+        } catch (error) {
+
+            console.error(
+                "Could not clear old YouTube auth:",
+                error
             );
         }
 
@@ -691,11 +663,8 @@ app.get(
 
         const client =
             new google.auth.OAuth2(
-
                 process.env.GOOGLE_CLIENT_ID,
-
                 process.env.GOOGLE_CLIENT_SECRET,
-
                 process.env.GOOGLE_REDIRECT_URI
             );
 
@@ -705,9 +674,18 @@ app.get(
                 access_type:
                     "offline",
 
+                /*
+                 * Force Google to show the consent screen.
+                 */
                 prompt:
                     "consent",
 
+                /*
+                 * Required permissions:
+                 *
+                 * youtube.upload
+                 * youtube.readonly
+                 */
                 scope: [
 
                     "https://www.googleapis.com/auth/youtube.upload",
@@ -727,14 +705,19 @@ app.get(
 );
 
 
-/* =========================================================
-   YOUTUBE OAUTH CALLBACK
-   ========================================================= */
+// ============================================================
+// YOUTUBE OAUTH CALLBACK
+// ============================================================
 
 app.get(
     "/api/youtube/callback",
+
     requireLogin,
-    async (req, res) => {
+
+    async (
+        req,
+        res
+    ) => {
 
         try {
 
@@ -766,11 +749,8 @@ app.get(
 
             const client =
                 new google.auth.OAuth2(
-
                     process.env.GOOGLE_CLIENT_ID,
-
                     process.env.GOOGLE_CLIENT_SECRET,
-
                     process.env.GOOGLE_REDIRECT_URI
                 );
 
@@ -781,30 +761,36 @@ app.get(
                     code
                 );
 
-            client.setCredentials(
-                tokens
-            );
-
+            /*
+             * A refresh token is required because the
+             * server needs to upload videos later.
+             */
             if (
                 !tokens.refresh_token
             ) {
 
                 return res.status(400).send(
-                    "No refresh token received. Disconnect D-Videos from Google and reconnect it."
+                    "Google did not return a refresh token. Revoke D-Videos from your Google Account and connect again."
                 );
             }
 
+            client.setCredentials(
+                tokens
+            );
+
             const youtube =
                 google.youtube({
-
                     version:
                         "v3",
 
                     auth:
                         client
-
                 });
 
+            /*
+             * Verify that the account actually has
+             * YouTube access.
+             */
             const result =
                 await youtube.channels.list({
 
@@ -817,15 +803,19 @@ app.get(
                 });
 
             const channel =
-                result.data.items?.[0];
+                result.data
+                    .items?.[0];
 
             if (!channel) {
 
                 return res.status(400).send(
-                    "No YouTube channel was found."
+                    "No YouTube channel was found on this Google account."
                 );
             }
 
+            /*
+             * Save the fresh refresh token.
+             */
             db.prepare(`
                 INSERT INTO youtube_auth (
                     id,
@@ -833,9 +823,16 @@ app.get(
                     channel_id,
                     channel_title
                 )
-                VALUES (1, ?, ?, ?)
+
+                VALUES (
+                    1,
+                    ?,
+                    ?,
+                    ?
+                )
 
                 ON CONFLICT(id)
+
                 DO UPDATE SET
 
                     refresh_token =
@@ -856,8 +853,12 @@ app.get(
                 channel.id,
 
                 channel.snippet?.title ||
-                    "D-Videos Videos"
+                    "YouTube Channel"
 
+            );
+
+            console.log(
+                `YouTube connected: ${channel.snippet?.title}`
             );
 
             res.redirect(
@@ -867,9 +868,22 @@ app.get(
         } catch (error) {
 
             console.error(
-                "YouTube OAuth error:",
+                "YOUTUBE OAUTH ERROR:",
                 error
             );
+
+            /*
+             * Remove a broken authorization so
+             * reconnecting starts cleanly.
+             */
+            try {
+
+                db.prepare(`
+                    DELETE FROM youtube_auth
+                    WHERE id = 1
+                `).run();
+
+            } catch {}
 
             res.status(500).send(
                 `YouTube connection failed: ${error.message}`
@@ -879,14 +893,19 @@ app.get(
 );
 
 
-/* =========================================================
-   YOUTUBE STATUS
-   ========================================================= */
+// ============================================================
+// YOUTUBE STATUS
+// ============================================================
 
 app.get(
     "/api/youtube/status",
+
     requireLogin,
-    (req, res) => {
+
+    (
+        req,
+        res
+    ) => {
 
         const channel =
             db.prepare(`
@@ -901,13 +920,15 @@ app.get(
         if (!channel) {
 
             return res.json({
-                connected: false
+                connected:
+                    false
             });
         }
 
         res.json({
 
-            connected: true,
+            connected:
+                true,
 
             channel: {
 
@@ -923,13 +944,56 @@ app.get(
                 channel.connected_at
 
         });
+
     }
 );
 
 
-/* =========================================================
-   VIDEO UPLOAD
-   ========================================================= */
+// ============================================================
+// DISCONNECT YOUTUBE
+// ============================================================
+
+app.post(
+    "/api/youtube/disconnect",
+
+    requireLogin,
+
+    (
+        req,
+        res
+    ) => {
+
+        try {
+
+            db.prepare(`
+                DELETE FROM youtube_auth
+                WHERE id = 1
+            `).run();
+
+            res.json({
+                success:
+                    true
+            });
+
+        } catch (error) {
+
+            console.error(
+                "YOUTUBE DISCONNECT ERROR:",
+                error
+            );
+
+            res.status(500).json({
+                error:
+                    "Could not disconnect YouTube."
+            });
+        }
+    }
+);
+
+
+// ============================================================
+// VIDEO UPLOAD
+// ============================================================
 
 app.post(
     "/api/videos/upload",
@@ -938,16 +1002,15 @@ app.post(
 
     upload.single("video"),
 
-    async (req, res) => {
+    async (
+        req,
+        res
+    ) => {
 
         let file =
             req.file;
 
         try {
-
-            /* -------------------------
-               CHECK FILE
-            ------------------------- */
 
             if (!file) {
 
@@ -957,19 +1020,16 @@ app.post(
                 });
             }
 
-
-            /* -------------------------
-               FORM DATA
-            ------------------------- */
-
             const title =
                 String(
-                    req.body.title || ""
+                    req.body.title ||
+                    ""
                 ).trim();
 
             const description =
                 String(
-                    req.body.description || ""
+                    req.body.description ||
+                    ""
                 ).trim();
 
             const category =
@@ -977,7 +1037,6 @@ app.post(
                     req.body.category ||
                     "Other"
                 ).trim();
-
 
             if (!title) {
 
@@ -987,42 +1046,43 @@ app.post(
                 });
             }
 
+            /*
+             * Get the authorized YouTube client.
+             */
+            const youtubeClient =
+                getYouTubeClient();
 
-            /* -------------------------
-               CHECK YOUTUBE
-            ------------------------- */
+            if (!youtubeClient) {
 
-            const youtube =
-                getYouTubeAPI();
-
-            if (!youtube) {
-
-                return res.status(400).json({
+                return res.status(401).json({
                     error:
-                        "D-Videos' YouTube channel has not been connected."
+                        "YouTube is not connected. Click Connect YouTube and authorize D-Videos again."
                 });
             }
 
+            const youtube =
+                google.youtube({
+
+                    version:
+                        "v3",
+
+                    auth:
+                        youtubeClient
+
+                });
 
             console.log(
-                `Uploading "${title}" to YouTube...`
+                `Uploading "${title}" to YouTube as UNLISTED...`
             );
 
-
-            /* =====================================================
-               UPLOAD TO YOUTUBE
-
-               THIS IS THE IMPORTANT PART.
-
-               privacyStatus is explicitly set to "unlisted".
-
-               That means:
-               - NOT public
-               - NOT private
-               - Anyone with the YouTube link can watch
-               - It won't appear publicly on the channel
-               ===================================================== */
-
+            /*
+             * UPLOAD TO YOUTUBE
+             *
+             * privacyStatus: "unlisted"
+             *
+             * This means it will NOT appear publicly
+             * on the channel's public video list.
+             */
             const result =
                 await youtube.videos.insert({
 
@@ -1040,15 +1100,6 @@ app.post(
                                 description ||
                                 "Uploaded to D-Videos.",
 
-                            /*
-                               YouTube category ID.
-
-                               22 = People & Blogs
-
-                               This is separate from your
-                               D-Videos category.
-                            */
-
                             categoryId:
                                 "22"
 
@@ -1056,17 +1107,8 @@ app.post(
 
                         status: {
 
-                            /*
-                             * FORCE UNLISTED
-                             */
-
                             privacyStatus:
                                 "unlisted",
-
-                            /*
-                             * Prevent YouTube from treating
-                             * the upload as made for kids.
-                             */
 
                             selfDeclaredMadeForKids:
                                 false
@@ -1086,11 +1128,6 @@ app.post(
 
                 });
 
-
-            /* -------------------------
-               GET YOUTUBE ID
-            ------------------------- */
-
             const youtubeId =
                 result.data.id;
 
@@ -1101,64 +1138,15 @@ app.post(
                 );
             }
 
-
-            console.log(
-                `YouTube upload complete: ${youtubeId}`
-            );
-
-
-            /* =====================================================
-               EXTRA SAFETY:
-
-               Explicitly update the video after upload.
-
-               This makes sure YouTube has the desired
-               privacy setting even if something changes in
-               the initial request.
-               ===================================================== */
-
-            await youtube.videos.update({
-
-                part:
-                    "status",
-
-                requestBody: {
-
-                    id:
-                        youtubeId,
-
-                    status: {
-
-                        privacyStatus:
-                            "unlisted",
-
-                        selfDeclaredMadeForKids:
-                            false
-
-                    }
-
-                }
-
-            });
-
-
-            console.log(
-                `YouTube video ${youtubeId} set to UNLISTED.`
-            );
-
-
-            /* -------------------------
-               THUMBNAIL
-            ------------------------- */
-
+            /*
+             * Thumbnail used by D-Videos.
+             */
             const thumbnail =
                 `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
 
-
-            /* -------------------------
-               SAVE TO DATABASE
-            ------------------------- */
-
+            /*
+             * Save the video in D-Videos.
+             */
             const saved =
                 db.prepare(`
                     INSERT INTO videos (
@@ -1169,7 +1157,15 @@ app.post(
                         category,
                         uploader_id
                     )
-                    VALUES (?, ?, ?, ?, ?, ?)
+
+                    VALUES (
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?
+                    )
                 `).run(
 
                     title,
@@ -1186,10 +1182,9 @@ app.post(
 
                 );
 
-
-            /* -------------------------
-               RESPONSE
-            ------------------------- */
+            console.log(
+                `Video successfully uploaded: ${youtubeId}`
+            );
 
             res.json({
 
@@ -1207,9 +1202,7 @@ app.post(
 
                 thumbnail,
 
-                category,
-
-                privacy:
+                privacyStatus:
                     "unlisted"
 
             });
@@ -1217,9 +1210,79 @@ app.post(
         } catch (error) {
 
             console.error(
-                "Video upload error:",
+                "VIDEO UPLOAD ERROR:",
                 error
             );
+
+            const errorText =
+                String(
+                    error.message ||
+                    ""
+                ).toLowerCase();
+
+            /*
+             * Handle the exact problem you were getting.
+             */
+            if (
+                errorText.includes(
+                    "insufficient"
+                ) ||
+                errorText.includes(
+                    "insufficientpermissions"
+                ) ||
+                errorText.includes(
+                    "insufficient authentication scopes"
+                )
+            ) {
+
+                try {
+
+                    db.prepare(`
+                        DELETE FROM youtube_auth
+                        WHERE id = 1
+                    `).run();
+
+                } catch {}
+
+                return res.status(403).json({
+
+                    error:
+                        "The YouTube authorization does not have upload permission. Please reconnect YouTube."
+
+                });
+            }
+
+            /*
+             * OAuth/token errors.
+             */
+            if (
+                errorText.includes(
+                    "invalid_grant"
+                ) ||
+                errorText.includes(
+                    "invalid credentials"
+                ) ||
+                errorText.includes(
+                    "unauthorized"
+                )
+            ) {
+
+                try {
+
+                    db.prepare(`
+                        DELETE FROM youtube_auth
+                        WHERE id = 1
+                    `).run();
+
+                } catch {}
+
+                return res.status(401).json({
+
+                    error:
+                        "The YouTube connection has expired. Please reconnect YouTube."
+
+                });
+            }
 
             res.status(500).json({
 
@@ -1231,48 +1294,37 @@ app.post(
 
         } finally {
 
-            /* -------------------------
-               DELETE TEMP FILE
-            ------------------------- */
-
-            if (
-                file &&
-                file.path
-            ) {
+            /*
+             * Delete the temporary uploaded file.
+             */
+            if (file?.path) {
 
                 try {
 
-                    if (
-                        fs.existsSync(
-                            file.path
-                        )
-                    ) {
-
-                        fs.unlinkSync(
-                            file.path
-                        );
-                    }
-
-                } catch (cleanupError) {
-
-                    console.error(
-                        "Temporary file cleanup error:",
-                        cleanupError
+                    fs.unlinkSync(
+                        file.path
                     );
-                }
+
+                } catch {}
+
             }
+
         }
     }
 );
 
 
-/* =========================================================
-   GET ALL VIDEOS
-   ========================================================= */
+// ============================================================
+// GET ALL VIDEOS
+// ============================================================
 
 app.get(
     "/api/videos",
-    (req, res) => {
+
+    (
+        req,
+        res
+    ) => {
 
         try {
 
@@ -1287,6 +1339,7 @@ app.get(
                         videos.category,
                         videos.created_at,
                         users.username AS uploader
+
                     FROM videos
 
                     JOIN users
@@ -1304,7 +1357,7 @@ app.get(
         } catch (error) {
 
             console.error(
-                "Get videos error:",
+                "GET VIDEOS ERROR:",
                 error
             );
 
@@ -1317,13 +1370,17 @@ app.get(
 );
 
 
-/* =========================================================
-   GET SINGLE VIDEO
-   ========================================================= */
+// ============================================================
+// GET SINGLE VIDEO
+// ============================================================
 
 app.get(
     "/api/videos/:id",
-    (req, res) => {
+
+    (
+        req,
+        res
+    ) => {
 
         try {
 
@@ -1338,6 +1395,7 @@ app.get(
                         videos.category,
                         videos.created_at,
                         users.username AS uploader
+
                     FROM videos
 
                     JOIN users
@@ -1364,7 +1422,7 @@ app.get(
         } catch (error) {
 
             console.error(
-                "Get video error:",
+                "GET VIDEO ERROR:",
                 error
             );
 
@@ -1377,63 +1435,93 @@ app.get(
 );
 
 
-/* =========================================================
-   OPTIONAL: GET MY VIDEOS
-   ========================================================= */
+// ============================================================
+// DELETE VIDEO FROM D-VIDEOS
+// ============================================================
 
-app.get(
-    "/api/videos/mine",
+app.delete(
+    "/api/videos/:id",
+
     requireLogin,
-    (req, res) => {
+
+    (
+        req,
+        res
+    ) => {
 
         try {
 
-            const videos =
+            const video =
                 db.prepare(`
-                    SELECT
-                        videos.id,
-                        videos.title,
-                        videos.description,
-                        videos.youtube_id,
-                        videos.thumbnail,
-                        videos.category,
-                        videos.created_at
+                    SELECT *
                     FROM videos
-
-                    WHERE videos.uploader_id = ?
-
-                    ORDER BY
-                        videos.created_at DESC
-                `).all(
-                    req.session.userId
+                    WHERE id = ?
+                `).get(
+                    req.params.id
                 );
 
+            if (!video) {
+
+                return res.status(404).json({
+                    error:
+                        "Video not found."
+                });
+            }
+
+            /*
+             * Only the uploader can remove the
+             * D-Videos database entry.
+             */
+            if (
+                video.uploader_id !==
+                req.session.userId
+            ) {
+
+                return res.status(403).json({
+                    error:
+                        "You cannot delete this video."
+                });
+            }
+
+            db.prepare(`
+                DELETE FROM videos
+                WHERE id = ?
+            `).run(
+                req.params.id
+            );
+
             res.json({
-                videos
+                success:
+                    true
             });
 
         } catch (error) {
 
             console.error(
-                "My videos error:",
+                "DELETE VIDEO ERROR:",
                 error
             );
 
             res.status(500).json({
                 error:
-                    "Could not load your videos."
+                    "Could not delete video."
             });
         }
     }
 );
 
 
-/* =========================================================
-   ERROR HANDLER
-   ========================================================= */
+// ============================================================
+// ERROR HANDLER
+// ============================================================
 
 app.use(
-    (error, req, res, next) => {
+    (
+        error,
+        req,
+        res,
+        next
+    ) => {
 
         console.error(
             "SERVER ERROR:",
@@ -1441,7 +1529,8 @@ app.use(
         );
 
         if (
-            error instanceof multer.MulterError
+            error instanceof
+            multer.MulterError
         ) {
 
             if (
@@ -1449,7 +1538,7 @@ app.use(
                 "LIMIT_FILE_SIZE"
             ) {
 
-                return res.status(400).json({
+                return res.status(413).json({
                     error:
                         "The video is too large. Maximum size is 5 GB."
                 });
@@ -1462,40 +1551,17 @@ app.use(
         }
 
         res.status(500).json({
-
             error:
                 error.message ||
                 "Something went wrong."
-
         });
     }
 );
 
 
-/* =========================================================
-   404 API HANDLER
-   ========================================================= */
-
-app.use(
-    "/api",
-    (req, res) => {
-
-        res.status(404).json({
-
-            error:
-                "API endpoint not found.",
-
-            path:
-                req.originalUrl
-
-        });
-    }
-);
-
-
-/* =========================================================
-   START SERVER
-   ========================================================= */
+// ============================================================
+// START SERVER
+// ============================================================
 
 app.listen(
     PORT,
@@ -1503,38 +1569,8 @@ app.listen(
     () => {
 
         console.log(
-            "======================================"
+            `D-Videos running on port ${PORT}`
         );
 
-        console.log(
-            "       D-VIDEOS SERVER ONLINE"
-        );
-
-        console.log(
-            "======================================"
-        );
-
-        console.log(
-            `Port: ${PORT}`
-        );
-
-        console.log(
-            `Public folder: ${path.join(
-                __dirname,
-                "public"
-            )}`
-        );
-
-        console.log(
-            "YouTube uploads: UNLISTED"
-        );
-
-        console.log(
-            "Database: SQLite"
-        );
-
-        console.log(
-            "======================================"
-        );
     }
 );
