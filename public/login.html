@@ -1,79 +1,90 @@
-const signupForm = document.getElementById("signupForm");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-if (signupForm) {
+    <title>Sign in — D-Videos</title>
 
-    signupForm.addEventListener("submit", async (event) => {
+    <link rel="stylesheet" href="/css/style.css">
+</head>
 
-        event.preventDefault();
+<body class="auth-page">
 
-        const username =
-            document.getElementById("username").value.trim();
+    <main class="auth-container">
 
-        const email =
-            document.getElementById("email").value.trim();
+        <a href="/" class="auth-logo">
+            <span>D</span>
+            D-Videos
+        </a>
 
-        const password =
-            document.getElementById("password").value;
+        <div class="auth-card">
 
-        const errorBox =
-            document.getElementById("signupError");
+            <div class="auth-header">
+                <h1>Welcome back</h1>
 
-        const button =
-            document.getElementById("signupButton");
+                <p>
+                    Sign in to continue watching D-Videos.
+                </p>
+            </div>
 
+            <form id="loginForm">
 
-        errorBox.hidden = true;
+                <label for="email">
+                    Email
+                </label>
 
-        button.disabled = true;
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    required
+                >
 
-        button.textContent = "Creating account...";
+                <label for="password">
+                    Password
+                </label>
 
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Your password"
+                    autocomplete="current-password"
+                    required
+                >
 
-        try {
+                <div
+                    class="auth-error"
+                    id="loginError"
+                    hidden
+                ></div>
 
-            const response = await fetch(
-                "/api/auth/signup",
-                {
-                    method: "POST",
+                <button
+                    type="submit"
+                    class="auth-submit"
+                    id="loginButton"
+                >
+                    Sign in
+                </button>
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+            </form>
 
-                    body: JSON.stringify({
-                        username,
-                        email,
-                        password
-                    })
-                }
-            );
+            <p class="auth-switch">
+                Don't have an account?
 
+                <a href="/signup.html">
+                    Create one
+                </a>
+            </p>
 
-            const data = await response.json();
+        </div>
 
+    </main>
 
-            if (!response.ok) {
-                throw new Error(
-                    data.error || "Could not create account."
-                );
-            }
+    <script src="/js/auth.js"></script>
 
-
-            // Account created + session established
-            window.location.href = "/";
-
-        } catch (error) {
-
-            errorBox.textContent = error.message;
-
-            errorBox.hidden = false;
-
-            button.disabled = false;
-
-            button.textContent = "Create account";
-
-        }
-
-    });
-
-}
+</body>
+</html>
