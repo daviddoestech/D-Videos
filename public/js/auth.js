@@ -1,153 +1,197 @@
-const signupForm = document.getElementById("signupForm");
+// =========================
+// LOGIN
+// =========================
 
-if (signupForm) {
-
-    signupForm.addEventListener("submit", async (event) => {
-
-        event.preventDefault();
-
-        const username =
-            document.getElementById("username").value.trim();
-
-        const email =
-            document.getElementById("email").value.trim();
-
-        const password =
-            document.getElementById("password").value;
-
-        const errorBox =
-            document.getElementById("signupError");
-
-        const button =
-            document.getElementById("signupButton");
-
-
-        errorBox.hidden = true;
-
-        button.disabled = true;
-
-        button.textContent = "Creating account...";
-
-
-        try {
-
-            const response = await fetch(
-                "/api/auth/signup",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        username,
-                        email,
-                        password
-                    })
-                }
-            );
-
-
-            const data = await response.json();
-
-
-            if (!response.ok) {
-                throw new Error(
-                    data.error || "Could not create account."
-                );
-            }
-
-
-            // Account created + session established
-            window.location.href = "/";
-
-        } catch (error) {
-
-            errorBox.textContent = error.message;
-
-            errorBox.hidden = false;
-
-            button.disabled = false;
-
-            button.textContent = "Create account";
-
-        }
-
-    });
-
-}
-const loginForm = document.getElementById("loginForm");
+const loginForm =
+    document.getElementById(
+        "loginForm"
+    );
 
 if (loginForm) {
 
-    loginForm.addEventListener("submit", async (event) => {
+    loginForm.addEventListener(
+        "submit",
+        async event => {
 
-        event.preventDefault();
+            event.preventDefault();
 
-        const email =
-            document.getElementById("email").value.trim();
+            const email =
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
 
-        const password =
-            document.getElementById("password").value;
+            const password =
+                document
+                    .getElementById("password")
+                    .value;
 
-        const errorBox =
-            document.getElementById("loginError");
-
-        const button =
-            document.getElementById("loginButton");
-
-
-        errorBox.hidden = true;
-
-        button.disabled = true;
-
-        button.textContent = "Signing in...";
-
-
-        try {
-
-            const response = await fetch(
-                "/api/auth/login",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        email,
-                        password
-                    })
-                }
-            );
-
-
-            const data = await response.json();
-
-
-            if (!response.ok) {
-                throw new Error(
-                    data.error || "Could not sign in."
+            const errorBox =
+                document.getElementById(
+                    "loginError"
                 );
+
+            const button =
+                document.getElementById(
+                    "loginButton"
+                );
+
+            errorBox.hidden = true;
+
+            button.disabled = true;
+
+            button.textContent =
+                "Signing in...";
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/auth/login",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                email,
+                                password
+                            })
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error ||
+                        "Could not sign in."
+                    );
+                }
+
+                window.location.href = "/";
+
+            } catch (error) {
+
+                errorBox.textContent =
+                    error.message;
+
+                errorBox.hidden = false;
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Sign in";
             }
 
+        }
+    );
 
-            window.location.href = "/";
+}
 
-        } catch (error) {
 
-            errorBox.textContent = error.message;
+// =========================
+// SIGNUP
+// =========================
 
-            errorBox.hidden = false;
+const signupForm =
+    document.getElementById(
+        "signupForm"
+    );
 
-            button.disabled = false;
+if (signupForm) {
 
-            button.textContent = "Sign in";
+    signupForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            const username =
+                document
+                    .getElementById("username")
+                    .value
+                    .trim();
+
+            const email =
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById("password")
+                    .value;
+
+            const errorBox =
+                document.getElementById(
+                    "signupError"
+                );
+
+            const button =
+                document.getElementById(
+                    "signupButton"
+                );
+
+            errorBox.hidden = true;
+
+            button.disabled = true;
+
+            button.textContent =
+                "Creating account...";
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/auth/signup",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                username,
+                                email,
+                                password
+                            })
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error ||
+                        "Could not create account."
+                    );
+                }
+
+                window.location.href = "/";
+
+            } catch (error) {
+
+                errorBox.textContent =
+                    error.message;
+
+                errorBox.hidden = false;
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Create account";
+            }
 
         }
-
-    });
+    );
 
 }
