@@ -19,7 +19,9 @@
 
 </head>
 
+
 <body>
+
 
 <header class="topbar">
 
@@ -48,6 +50,7 @@
             id="searchInput"
             type="search"
             placeholder="Search D-Videos..."
+            autocomplete="off"
         >
 
         <button type="submit">
@@ -81,6 +84,7 @@
 </header>
 
 
+
 <div class="page-layout">
 
 
@@ -96,6 +100,7 @@
                 Home
             </a>
 
+
             <a
                 href="#videos"
                 class="sidebar-link"
@@ -103,6 +108,7 @@
                 🔥
                 Trending
             </a>
+
 
             <a
                 href="#videos"
@@ -112,11 +118,14 @@
                 Latest
             </a>
 
+
             <div class="sidebar-divider"></div>
+
 
             <div class="sidebar-title">
                 D-Videos
             </div>
+
 
             <a
                 href="/login.html"
@@ -125,6 +134,7 @@
                 🔐
                 Sign in
             </a>
+
 
             <a
                 href="/signup.html"
@@ -139,6 +149,7 @@
     </aside>
 
 
+
     <main class="main-content">
 
 
@@ -150,15 +161,18 @@
                     D-VIDEOS
                 </div>
 
+
                 <h1>
                     Watch something
                     <span>different.</span>
                 </h1>
 
+
                 <p>
                     Discover videos, creators and
                     things worth watching.
                 </p>
+
 
                 <div class="hero-actions">
 
@@ -169,6 +183,7 @@
                     >
                         Create your account
                     </a>
+
 
                     <a
                         href="/upload.html"
@@ -182,6 +197,7 @@
                 </div>
 
             </div>
+
 
 
             <div class="hero-decoration">
@@ -199,7 +215,9 @@
         </section>
 
 
+
         <section class="categories">
+
 
             <button
                 class="category active"
@@ -208,12 +226,14 @@
                 All
             </button>
 
+
             <button
                 class="category"
                 data-category="Gaming"
             >
                 Gaming
             </button>
+
 
             <button
                 class="category"
@@ -222,12 +242,14 @@
                 Technology
             </button>
 
+
             <button
                 class="category"
                 data-category="Music"
             >
                 Music
             </button>
+
 
             <button
                 class="category"
@@ -236,12 +258,14 @@
                 Entertainment
             </button>
 
+
             <button
                 class="category"
                 data-category="Education"
             >
                 Education
             </button>
+
 
             <button
                 class="category"
@@ -253,10 +277,12 @@
         </section>
 
 
+
         <section
             class="video-section"
             id="videos"
         >
+
 
             <div class="section-heading">
 
@@ -272,14 +298,17 @@
 
                 </div>
 
+
                 <button
                     id="refreshVideos"
                     class="refresh-button"
+                    type="button"
                 >
                     ↻ Refresh
                 </button>
 
             </div>
+
 
 
             <div
@@ -294,6 +323,7 @@
             </div>
 
 
+
             <div
                 id="emptyState"
                 class="empty-state"
@@ -304,14 +334,17 @@
                     ▶
                 </div>
 
+
                 <h3>
                     Nothing here yet.
                 </h3>
+
 
                 <p>
                     Be the first to upload
                     something to D-Videos.
                 </p>
+
 
                 <a
                     href="/signup.html"
@@ -322,16 +355,23 @@
 
             </div>
 
+
         </section>
 
+
     </main>
+
 
 </div>
 
 
+
+<!-- VIDEO CARD TEMPLATE -->
+
 <template id="videoTemplate">
 
     <article class="video-card">
+
 
         <a
             class="video-thumbnail-link"
@@ -342,6 +382,7 @@
                 <img
                     class="video-thumbnail-image"
                     loading="lazy"
+                    alt=""
                 >
 
                 <div class="video-play">
@@ -353,9 +394,13 @@
         </a>
 
 
+
         <div class="video-info">
 
-            <a class="video-title"></a>
+            <a
+                class="video-title"
+            ></a>
+
 
             <div class="video-meta">
 
@@ -365,60 +410,72 @@
 
             </div>
 
+
             <div class="video-date"></div>
 
         </div>
+
 
     </article>
 
 </template>
 
 
+
 <script>
+
 
 const videoGrid =
     document.getElementById(
         "videoGrid"
     );
 
+
 const emptyState =
     document.getElementById(
         "emptyState"
     );
+
 
 const videoTemplate =
     document.getElementById(
         "videoTemplate"
     );
 
+
 const refreshButton =
     document.getElementById(
         "refreshVideos"
     );
+
 
 const searchForm =
     document.getElementById(
         "searchForm"
     );
 
+
 const searchInput =
     document.getElementById(
         "searchInput"
     );
+
 
 const categories =
     document.querySelectorAll(
         ".category"
     );
 
+
 let allVideos = [];
 
 let currentCategory = "All";
 
 
-// =========================
-// USER
-// =========================
+
+/* =========================================
+   USER
+   ========================================= */
 
 async function loadUser() {
 
@@ -429,25 +486,31 @@ async function loadUser() {
                 "/api/auth/me"
             );
 
+
         const data =
             await response.json();
+
 
         const accountArea =
             document.getElementById(
                 "accountArea"
             );
 
+
         const heroSignup =
             document.getElementById(
                 "heroSignup"
             );
+
 
         const heroUpload =
             document.getElementById(
                 "heroUpload"
             );
 
+
         if (data.loggedIn) {
+
 
             accountArea.innerHTML = `
 
@@ -457,6 +520,7 @@ async function loadUser() {
                     )}
                 </span>
 
+
                 <a
                     href="/upload.html"
                     class="nav-button primary"
@@ -464,23 +528,29 @@ async function loadUser() {
                     Upload
                 </a>
 
+
                 <button
                     class="nav-button secondary"
                     id="logoutButton"
+                    type="button"
                 >
                     Sign out
                 </button>
 
             `;
 
+
             heroSignup.textContent =
                 "My channel";
+
 
             heroSignup.href =
                 "/channel.html";
 
+
             heroUpload.style.display =
                 "inline-flex";
+
 
             document
                 .getElementById(
@@ -493,84 +563,140 @@ async function loadUser() {
 
         }
 
+
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "User loading error:",
+            error
+        );
 
     }
 
 }
 
 
-// =========================
-// LOGOUT
-// =========================
+
+/* =========================================
+   LOGOUT
+   ========================================= */
 
 async function logout() {
 
-    await fetch(
-        "/api/auth/logout",
-        {
-            method: "POST"
-        }
-    );
+    try {
 
-    window.location.reload();
+        await fetch(
+            "/api/auth/logout",
+            {
+                method: "POST"
+            }
+        );
+
+
+        window.location.reload();
+
+
+    } catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
 
 }
 
 
-// =========================
-// VIDEOS
-// =========================
+
+/* =========================================
+   LOAD VIDEOS
+   ========================================= */
 
 async function loadVideos() {
 
+
     videoGrid.innerHTML = `
+
         <div class="loading-state">
             Loading videos...
         </div>
+
     `;
 
+
+    emptyState.hidden = true;
+
+
     try {
+
 
         const response =
             await fetch(
                 "/api/videos"
             );
 
+
         const data =
             await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Could not load videos."
+            );
+
+        }
+
 
         allVideos =
             data.videos || [];
 
+
         renderVideos();
+
 
     } catch (error) {
 
-        console.error(error);
+
+        console.error(
+            "Video loading error:",
+            error
+        );
+
 
         videoGrid.innerHTML = `
+
             <div class="loading-state">
                 Could not load videos.
             </div>
+
         `;
+
     }
 
 }
 
 
-// =========================
-// RENDER
-// =========================
+
+/* =========================================
+   RENDER VIDEOS
+   ========================================= */
 
 function renderVideos() {
+
 
     let videos =
         [...allVideos];
 
-    if (currentCategory !== "All") {
+
+    /* CATEGORY */
+
+    if (
+        currentCategory !== "All"
+    ) {
 
         videos =
             videos.filter(
@@ -581,107 +707,196 @@ function renderVideos() {
 
     }
 
+
+    /* SEARCH */
+
     const search =
         searchInput.value
             .trim()
             .toLowerCase();
 
+
     if (search) {
 
         videos =
             videos.filter(
-                video =>
-                    video.title
-                        .toLowerCase()
-                        .includes(search) ||
+                video => {
 
-                    video.uploader
-                        .toLowerCase()
-                        .includes(search)
+                    const title =
+                        String(
+                            video.title || ""
+                        ).toLowerCase();
+
+
+                    const uploader =
+                        String(
+                            video.uploader || ""
+                        ).toLowerCase();
+
+
+                    const description =
+                        String(
+                            video.description || ""
+                        ).toLowerCase();
+
+
+                    return (
+                        title.includes(search) ||
+                        uploader.includes(search) ||
+                        description.includes(search)
+                    );
+
+                }
             );
 
     }
 
+
     videoGrid.innerHTML = "";
+
+
+    /* EMPTY */
 
     if (!videos.length) {
 
-        emptyState.hidden = false;
+        emptyState.hidden =
+            false;
 
         return;
 
     }
 
-    emptyState.hidden = true;
 
-    videos.forEach(video => {
+    emptyState.hidden =
+        true;
 
-        const fragment =
-            videoTemplate.content.cloneNode(
-                true
+
+    /* CREATE CARDS */
+
+    videos.forEach(
+        video => {
+
+
+            const fragment =
+                videoTemplate.content.cloneNode(
+                    true
+                );
+
+
+            const thumbnailLink =
+                fragment.querySelector(
+                    ".video-thumbnail-link"
+                );
+
+
+            const image =
+                fragment.querySelector(
+                    ".video-thumbnail-image"
+                );
+
+
+            const title =
+                fragment.querySelector(
+                    ".video-title"
+                );
+
+
+            const uploader =
+                fragment.querySelector(
+                    ".video-uploader"
+                );
+
+
+            const date =
+                fragment.querySelector(
+                    ".video-date"
+                );
+
+
+            /* WATCH LINK */
+
+            const watchUrl =
+                `/watch.html?id=${encodeURIComponent(
+                    video.id
+                )}`;
+
+
+            thumbnailLink.href =
+                watchUrl;
+
+
+            title.href =
+                watchUrl;
+
+
+            /* THUMBNAIL */
+
+            image.src =
+                video.thumbnail ||
+                `https://img.youtube.com/vi/${
+                    encodeURIComponent(
+                        video.youtube_id
+                    )
+                }/hqdefault.jpg`;
+
+
+            image.alt =
+                video.title ||
+                "D-Videos video";
+
+
+            /* TITLE */
+
+            title.textContent =
+                video.title ||
+                "Untitled video";
+
+
+            /* UPLOADER */
+
+            uploader.textContent =
+                `@${video.uploader || "unknown"}`;
+
+
+            /* DATE */
+
+            if (video.created_at) {
+
+                const parsedDate =
+                    new Date(
+                        video.created_at
+                    );
+
+
+                date.textContent =
+                    Number.isNaN(
+                        parsedDate.getTime()
+                    )
+                        ? ""
+                        : parsedDate.toLocaleDateString();
+
+            } else {
+
+                date.textContent =
+                    "";
+
+            }
+
+
+            videoGrid.appendChild(
+                fragment
             );
 
-        const thumbnailLink =
-            fragment.querySelector(
-                ".video-thumbnail-link"
-            );
-
-        const image =
-            fragment.querySelector(
-                ".video-thumbnail-image"
-            );
-
-        const title =
-            fragment.querySelector(
-                ".video-title"
-            );
-
-        const uploader =
-            fragment.querySelector(
-                ".video-uploader"
-            );
-
-        const date =
-            fragment.querySelector(
-                ".video-date"
-            );
-
-        thumbnailLink.href =
-            `/watch.html?id=${video.id}`;
-
-        image.src =
-            video.thumbnail ||
-            `https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`;
-
-        image.alt =
-            video.title;
-
-        title.textContent =
-            video.title;
-
-        title.href =
-            `/watch.html?id=${video.id}`;
-
-        uploader.textContent =
-            `@${video.uploader}`;
-
-        date.textContent =
-            new Date(
-                video.created_at
-            ).toLocaleDateString();
-
-        videoGrid.appendChild(
-            fragment
-        );
-
-    });
+        }
+    );
 
 }
 
 
-// =========================
-// SEARCH
-// =========================
+
+/* =========================================
+   SEARCH
+   ========================================= */
 
 searchForm.addEventListener(
     "submit",
@@ -694,47 +909,59 @@ searchForm.addEventListener(
     }
 );
 
+
 searchInput.addEventListener(
     "input",
     renderVideos
 );
 
 
-// =========================
-// CATEGORIES
-// =========================
 
-categories.forEach(button => {
+/* =========================================
+   CATEGORIES
+   ========================================= */
 
-    button.addEventListener(
-        "click",
-        () => {
+categories.forEach(
+    button => {
 
-            categories.forEach(
-                item =>
-                    item.classList.remove(
-                        "active"
-                    )
-            );
-
-            button.classList.add(
-                "active"
-            );
-
-            currentCategory =
-                button.dataset.category;
-
-            renderVideos();
-
-        }
-    );
-
-});
+        button.addEventListener(
+            "click",
+            () => {
 
 
-// =========================
-// REFRESH
-// =========================
+                categories.forEach(
+                    item => {
+
+                        item.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                button.classList.add(
+                    "active"
+                );
+
+
+                currentCategory =
+                    button.dataset.category;
+
+
+                renderVideos();
+
+            }
+        );
+
+    }
+);
+
+
+
+/* =========================================
+   REFRESH
+   ========================================= */
 
 refreshButton.addEventListener(
     "click",
@@ -742,30 +969,53 @@ refreshButton.addEventListener(
 );
 
 
-// =========================
-// ESCAPE HTML
-// =========================
+
+/* =========================================
+   ESCAPE HTML
+   ========================================= */
 
 function escapeHtml(value) {
 
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    return String(
+        value ?? ""
+    )
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 
 
-// =========================
-// START
-// =========================
+
+/* =========================================
+   START
+   ========================================= */
 
 loadUser();
+
 loadVideos();
+
 
 </script>
 
+
 </body>
+
 </html>
