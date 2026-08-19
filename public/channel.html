@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Channel — D-Videos</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+</head>
+
+<body>
+
+<header class="site-header">
+
+    <div class="header-inner">
+
+        <a href="/" class="site-logo">
+            <span>D</span>
+            D-Videos
+        </a>
+
+        <nav class="main-nav">
+            <a href="/">Home</a>
+            <a href="/channel.html">Channel</a>
+            <a href="/upload.html">Upload</a>
+        </nav>
+
+        <div class="header-account" id="accountArea">
+            <a
+                href="/login.html"
+                class="nav-button"
+            >
+                Sign in
+            </a>
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="channel-page">
+
+    <!-- CHANNEL HEADER -->
+
+    <section class="channel-header">
+
+        <div class="channel-avatar">
+            D
+        </div>
+
+        <div class="channel-info">
+
+            <h1>
+                D-Videos
+            </h1>
+
+            <p>
+                Videos uploaded to D-Videos.
+            </p>
+
+            <div
+                class="channel-stats"
+                id="channelStats"
+            >
+                Loading videos...
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- VIDEOS -->
+
+    <section class="channel-videos">
+
+        <div class="section-heading">
+
+            <h2>
+                Videos
+            </h2>
+
+            <span id="videoCount">
+                0 videos
+            </span>
+
+        </div>
+
+
+        <div
+            class="video-grid"
+            id="videoGrid"
+        >
+
+            <div class="channel-loading">
+                <div class="loading-spinner"></div>
+
+                <p>
+                    Loading videos...
+                </p>
+            </div>
+
+        </div>
+
+
+        <div
+            class="channel-empty"
+            id="emptyState"
+            hidden
+        >
+
+            <div class="empty-icon">
+                ▶
+            </div>
+
+            <h2>
+                No videos yet
+            </h2>
+
+            <p>
+                There aren't any videos on this channel yet.
+            </p>
+
+            <a
+                href="/upload.html"
+                class="button button-primary"
+            >
+                Upload a video
+            </a>
+
+        </div>
+
+
+        <div
+            class="channel-error"
+            id="errorState"
+            hidden
+        >
+
+            <h2>
+                Couldn't load videos
+            </h2>
+
+            <p id="errorText">
+                Something went wrong while loading the channel.
+            </p>
+
+            <button
+                class="button"
+                id="retryButton"
+            >
+                Try again
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+// ============================================================
+// ELEMENTS
+// ============================================================
+
+const videoGrid =
+    document.getElementById(
+        "videoGrid"
+    );
+
+const emptyState =
+    document.getElementById(
+        "emptyState"
+    );
+
+const errorState =
+    document.getElementById(
+        "errorState"
+    );
+
+const errorText =
+    document.getElementById(
+        "errorText"
+    );
+
+const videoCount =
+    document.getElementById(
+        "videoCount"
+    );
+
+const channelStats =
+    document.getElementById(
+        "channelStats"
+    );
+
+const retryButton =
+    document.getElementById(
+        "retryButton"
+    );
+
+
+// ============================================================
+// LOAD VIDEOS
+// ============================================================
+
+async function loadVideos() {
+
+    videoGrid.hidden = false;
+    emptyState.hidden = true;
+    errorState.hidden = true;
+
+    videoGrid.innerHTML = `
+
+        <div class="channel-loading">
+
+            <div class="loading-spinner"></div>
+
+            <p>
+                Loading videos...
+            </p>
+
+        </div>
+
+    `;
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/videos",
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Server returned ${response.status}`
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const videos =
+            Array.isArray(data.videos)
+                ? data.videos
+                : [];
+
+
+        updateStats(videos);
+
+
+        if (!videos.length) {
+
+            videoGrid.hidden = true;
+            emptyState.hidden = false;
+
+            return;
+
+        }
+
+
+        videoGrid.innerHTML = "";
+
+
+        videos.forEach(
+            video => {
+
+                videoGrid.appendChild(
+                    createVideoCard(video)
+                );
+
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load videos:",
+            error
+        );
+
+
+        videoGrid.hidden = true;
+
+        errorState.hidden = false;
+
+
+        errorText.textContent =
+            "Could not connect to the D-Videos server.";
+
+    }
+
+}
+
+
+// ============================================================
+// CREATE VIDEO CARD
+// ============================================================
+
+function createVideoCard(video) {
+
+    const card =
+        document.createElement(
+            "a"
+        );
+
+
+    card.className =
+        "video-card";
+
+
+    card.href =
+        `/watch.html?id=${encodeURIComponent(video.id)}`;
+
+
+    const thumbnail =
+        video.thumbnail ||
+        (
+            video.youtube_id
+                ? `https://img.youtube.com/vi/${encodeURIComponent(video.youtube_id)}/hqdefault.jpg`
+                : ""
+        );
+
+
+    const date =
+        formatDate(
+            video.created_at
+        );
+
+
+    card.innerHTML = `
+
+        <div class="video-thumbnail-wrapper">
+
+            ${
+                thumbnail
+                    ? `
+                        <img
+                            src="${escapeAttribute(thumbnail)}"
+                            class="video-card-thumbnail"
+                            alt=""
+                            loading="lazy"
+                        >
+                    `
+                    : `
+                        <div class="video-thumbnail-placeholder">
+                            ▶
+                        </div>
+                    `
+            }
+
+        </div>
+
+
+        <div class="video-card-content">
+
+            <h3 class="video-card-title">
+                ${escapeHtml(
+                    video.title || "Untitled video"
+                )}
+            </h3>
+
+
+            <div class="video-card-uploader">
+
+                ${escapeHtml(
+                    video.uploader || "Unknown uploader"
+                )}
+
+                •
+
+                ${escapeHtml(date)}
+
+            </div>
+
+
+            ${
+                video.category
+                    ? `
+                        <div class="video-card-category">
+                            ${escapeHtml(video.category)}
+                        </div>
+                    `
+                    : ""
+            }
+
+        </div>
+
+    `;
+
+
+    return card;
+
+}
+
+
+// ============================================================
+// STATS
+// ============================================================
+
+function updateStats(videos) {
+
+    const count =
+        videos.length;
+
+
+    videoCount.textContent =
+        `${count} ${
+            count === 1
+                ? "video"
+                : "videos"
+        }`;
+
+
+    channelStats.textContent =
+        `${count} ${
+            count === 1
+                ? "video"
+                : "videos"
+        }`;
+
+}
+
+
+// ============================================================
+// DATE
+// ============================================================
+
+function formatDate(value) {
+
+    if (!value) {
+        return "Recently";
+    }
+
+
+    const date =
+        new Date(
+            value.replace(
+                " ",
+                "T"
+            ) + "Z"
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "Recently";
+
+    }
+
+
+    return date.toLocaleDateString(
+        undefined,
+        {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        }
+    );
+
+}
+
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
+
+function escapeHtml(value) {
+
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+// ============================================================
+// ESCAPE ATTRIBUTE
+// ============================================================
+
+function escapeAttribute(value) {
+
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        );
+
+}
+
+
+// ============================================================
+// RETRY
+// ============================================================
+
+retryButton.addEventListener(
+    "click",
+    loadVideos
+);
+
+
+// ============================================================
+// INITIAL LOAD
+// ============================================================
+
+loadVideos();
+
+</script>
+
+</body>
+</html>
