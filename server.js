@@ -13,12 +13,11 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Render sits behind a proxy.
 app.set("trust proxy", 1);
 
-// =========================
+// ============================================================
 // DATABASE
-// =========================
+// ============================================================
 
 const db = new Database(
     path.join(__dirname, "database.db")
@@ -26,7 +25,6 @@ const db = new Database(
 
 db.pragma("journal_mode = WAL");
 
-// Users
 db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,7 +35,6 @@ db.prepare(`
     )
 `).run();
 
-// YouTube authorization
 db.prepare(`
     CREATE TABLE IF NOT EXISTS youtube_auth (
         id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -48,7 +45,6 @@ db.prepare(`
     )
 `).run();
 
-// Videos
 db.prepare(`
     CREATE TABLE IF NOT EXISTS videos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,9 +62,9 @@ db.prepare(`
 console.log("Database ready.");
 
 
-// =========================
-// TEMP UPLOAD DIRECTORY
-// =========================
+// ============================================================
+// TEMP UPLOADS
+// ============================================================
 
 const tempDirectory = path.join(
     __dirname,
@@ -82,16 +78,14 @@ if (!fs.existsSync(tempDirectory)) {
 }
 
 
-// =========================
+// ============================================================
 // MULTER
-// =========================
+// ============================================================
 
 const upload = multer({
     dest: tempDirectory,
 
     limits: {
-        // 5 GB for now.
-        // We can change this later.
         fileSize: 5 * 1024 * 1024 * 1024
     },
 
@@ -108,9 +102,9 @@ const upload = multer({
 });
 
 
-// =========================
+// ============================================================
 // MIDDLEWARE
-// =========================
+// ============================================================
 
 app.use(express.json());
 app.use(express.urlencoded({
@@ -136,19 +130,15 @@ app.use(
                 process.env.NODE_ENV === "production",
 
             maxAge:
-                1000 *
-                60 *
-                60 *
-                24 *
-                30
+                1000 * 60 * 60 * 24 * 30
         }
     })
 );
 
 
-// =========================
+// ============================================================
 // FRONTEND
-// =========================
+// ============================================================
 
 app.use(
     express.static(
@@ -157,9 +147,9 @@ app.use(
 );
 
 
-// =========================
+// ============================================================
 // HELPERS
-// =========================
+// ============================================================
 
 function requireLogin(req, res, next) {
 
@@ -202,7 +192,8 @@ function getYouTubeClient() {
 
 function getYouTubeAPI() {
 
-    const client = getYouTubeClient();
+    const client =
+        getYouTubeClient();
 
     if (!client) {
         return null;
@@ -215,9 +206,20 @@ function getYouTubeAPI() {
 }
 
 
-// =========================
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+// ============================================================
 // HEALTH
-// =========================
+// ============================================================
 
 app.get("/api/health", (req, res) => {
 
@@ -230,295 +232,322 @@ app.get("/api/health", (req, res) => {
 });
 
 
-// =========================
+// ============================================================
 // SIGN UP
-// =========================
+// ============================================================
 
-app.post("/api/auth/signup", async (req, res) => {
+app.post(
+    "/api/auth/signup",
+    async (req, res) => {
 
-    try {
+        try {
 
-        const {
-            username,
-            email,
-            password
-        } = req.body;
-
-        if (!username || !email || !password) {
-            return res.status(400).json({
-                error: "All fields are required."
-            });
-        }
-
-        const cleanUsername =
-            username.trim();
-
-        const cleanEmail =
-            email.trim().toLowerCase();
-
-        if (cleanUsername.length < 3) {
-            return res.status(400).json({
-                error:
-                    "Username must be at least 3 characters."
-            });
-        }
-
-        if (password.length < 8) {
-            return res.status(400).json({
-                error:
-                    "Password must be at least 8 characters."
-            });
-        }
-
-        const existingUser = db.prepare(`
-            SELECT id
-            FROM users
-            WHERE username = ?
-               OR email = ?
-        `).get(
-            cleanUsername,
-            cleanEmail
-        );
-
-        if (existingUser) {
-            return res.status(409).json({
-                error:
-                    "Username or email is already registered."
-            });
-        }
-
-        const passwordHash =
-            await bcrypt.hash(
-                password,
-                12
-            );
-
-        const result = db.prepare(`
-            INSERT INTO users (
+            const {
                 username,
                 email,
-                password_hash
-            )
-            VALUES (?, ?, ?)
-        `).run(
-            cleanUsername,
-            cleanEmail,
-            passwordHash
-        );
+                password
+            } = req.body;
 
-        req.session.userId =
-            result.lastInsertRowid;
-
-        res.json({
-            success: true,
-
-            user: {
-                id:
-                    result.lastInsertRowid,
-
-                username:
-                    cleanUsername
+            if (!username || !email || !password) {
+                return res.status(400).json({
+                    error: "All fields are required."
+                });
             }
-        });
 
-    } catch (error) {
+            const cleanUsername =
+                username.trim();
 
-        console.error(error);
+            const cleanEmail =
+                email.trim().toLowerCase();
 
-        res.status(500).json({
-            error:
-                "Something went wrong."
-        });
+            if (cleanUsername.length < 3) {
+                return res.status(400).json({
+                    error:
+                        "Username must be at least 3 characters."
+                });
+            }
+
+            if (password.length < 8) {
+                return res.status(400).json({
+                    error:
+                        "Password must be at least 8 characters."
+                });
+            }
+
+            const existingUser =
+                db.prepare(`
+                    SELECT id
+                    FROM users
+                    WHERE username = ?
+                       OR email = ?
+                `).get(
+                    cleanUsername,
+                    cleanEmail
+                );
+
+            if (existingUser) {
+                return res.status(409).json({
+                    error:
+                        "Username or email is already registered."
+                });
+            }
+
+            const passwordHash =
+                await bcrypt.hash(
+                    password,
+                    12
+                );
+
+            const result =
+                db.prepare(`
+                    INSERT INTO users (
+                        username,
+                        email,
+                        password_hash
+                    )
+                    VALUES (?, ?, ?)
+                `).run(
+                    cleanUsername,
+                    cleanEmail,
+                    passwordHash
+                );
+
+            req.session.userId =
+                result.lastInsertRowid;
+
+            res.json({
+                success: true,
+
+                user: {
+                    id:
+                        result.lastInsertRowid,
+
+                    username:
+                        cleanUsername
+                }
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            res.status(500).json({
+                error:
+                    "Something went wrong."
+            });
+
+        }
 
     }
+);
 
-});
 
-
-// =========================
+// ============================================================
 // LOGIN
-// =========================
+// ============================================================
 
-app.post("/api/auth/login", async (req, res) => {
+app.post(
+    "/api/auth/login",
+    async (req, res) => {
 
-    try {
+        try {
 
-        const {
-            email,
-            password
-        } = req.body;
+            const {
+                email,
+                password
+            } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({
+            if (!email || !password) {
+                return res.status(400).json({
+                    error:
+                        "Email and password are required."
+                });
+            }
+
+            const cleanEmail =
+                email.trim().toLowerCase();
+
+            const user =
+                db.prepare(`
+                    SELECT *
+                    FROM users
+                    WHERE email = ?
+                `).get(cleanEmail);
+
+            if (!user) {
+                return res.status(401).json({
+                    error:
+                        "Invalid email or password."
+                });
+            }
+
+            const passwordValid =
+                await bcrypt.compare(
+                    password,
+                    user.password_hash
+                );
+
+            if (!passwordValid) {
+                return res.status(401).json({
+                    error:
+                        "Invalid email or password."
+                });
+            }
+
+            req.session.userId =
+                user.id;
+
+            res.json({
+                success: true,
+
+                user: {
+                    id: user.id,
+                    username: user.username
+                }
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            res.status(500).json({
                 error:
-                    "Email and password are required."
+                    "Something went wrong."
+            });
+
+        }
+
+    }
+);
+
+
+// ============================================================
+// CURRENT USER
+// ============================================================
+
+app.get(
+    "/api/auth/me",
+    (req, res) => {
+
+        if (!req.session.userId) {
+            return res.json({
+                loggedIn: false
             });
         }
 
-        const cleanEmail =
-            email.trim().toLowerCase();
-
-        const user = db.prepare(`
-            SELECT *
-            FROM users
-            WHERE email = ?
-        `).get(cleanEmail);
-
-        if (!user) {
-            return res.status(401).json({
-                error:
-                    "Invalid email or password."
-            });
-        }
-
-        const passwordValid =
-            await bcrypt.compare(
-                password,
-                user.password_hash
+        const user =
+            db.prepare(`
+                SELECT
+                    id,
+                    username,
+                    email,
+                    created_at
+                FROM users
+                WHERE id = ?
+            `).get(
+                req.session.userId
             );
 
-        if (!passwordValid) {
-            return res.status(401).json({
-                error:
-                    "Invalid email or password."
+        if (!user) {
+            return res.json({
+                loggedIn: false
             });
         }
 
-        req.session.userId =
-            user.id;
-
         res.json({
-            success: true,
-
-            user: {
-                id: user.id,
-                username: user.username
-            }
-        });
-
-    } catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({
-            error:
-                "Something went wrong."
+            loggedIn: true,
+            user
         });
 
     }
-
-});
-
-
-// =========================
-// CURRENT USER
-// =========================
-
-app.get("/api/auth/me", (req, res) => {
-
-    if (!req.session.userId) {
-        return res.json({
-            loggedIn: false
-        });
-    }
-
-    const user = db.prepare(`
-        SELECT
-            id,
-            username,
-            email,
-            created_at
-        FROM users
-        WHERE id = ?
-    `).get(req.session.userId);
-
-    if (!user) {
-        return res.json({
-            loggedIn: false
-        });
-    }
-
-    res.json({
-        loggedIn: true,
-        user
-    });
-
-});
+);
 
 
-// =========================
+// ============================================================
 // LOGOUT
-// =========================
+// ============================================================
 
-app.post("/api/auth/logout", (req, res) => {
+app.post(
+    "/api/auth/logout",
+    (req, res) => {
 
-    req.session.destroy((error) => {
+        req.session.destroy(
+            (error) => {
 
-        if (error) {
-            return res.status(500).json({
-                error:
-                    "Could not log out."
-            });
-        }
+                if (error) {
+                    return res.status(500).json({
+                        error:
+                            "Could not log out."
+                    });
+                }
 
-        res.json({
-            success: true
-        });
+                res.json({
+                    success: true
+                });
 
-    });
+            }
+        );
 
-});
+    }
+);
 
 
 // ============================================================
 // YOUTUBE OAUTH
 // ============================================================
 
-app.get("/api/youtube/auth", requireLogin, (req, res) => {
+app.get(
+    "/api/youtube/auth",
+    requireLogin,
+    (req, res) => {
 
-    if (
-        !process.env.GOOGLE_CLIENT_ID ||
-        !process.env.GOOGLE_CLIENT_SECRET ||
-        !process.env.GOOGLE_REDIRECT_URI
-    ) {
-        return res.status(500).send(
-            "Google OAuth environment variables are missing."
-        );
+        if (
+            !process.env.GOOGLE_CLIENT_ID ||
+            !process.env.GOOGLE_CLIENT_SECRET ||
+            !process.env.GOOGLE_REDIRECT_URI
+        ) {
+            return res.status(500).send(
+                "Google OAuth environment variables are missing."
+            );
+        }
+
+        const state =
+            crypto.randomBytes(32).toString("hex");
+
+        req.session.youtubeOAuthState =
+            state;
+
+        const oauthClient =
+            new google.auth.OAuth2(
+                process.env.GOOGLE_CLIENT_ID,
+                process.env.GOOGLE_CLIENT_SECRET,
+                process.env.GOOGLE_REDIRECT_URI
+            );
+
+        const authUrl =
+            oauthClient.generateAuthUrl({
+
+                access_type: "offline",
+
+                prompt: "consent",
+
+                scope: [
+                    "https://www.googleapis.com/auth/youtube.upload"
+                ],
+
+                state
+
+            });
+
+        res.redirect(authUrl);
+
     }
-
-    const state =
-        crypto.randomBytes(32).toString("hex");
-
-    req.session.youtubeOAuthState =
-        state;
-
-    const oauthClient =
-        new google.auth.OAuth2(
-            process.env.GOOGLE_CLIENT_ID,
-            process.env.GOOGLE_CLIENT_SECRET,
-            process.env.GOOGLE_REDIRECT_URI
-        );
-
-    const authUrl =
-        oauthClient.generateAuthUrl({
-            access_type: "offline",
-
-            prompt: "consent",
-
-            scope: [
-                "https://www.googleapis.com/auth/youtube.upload"
-            ],
-
-            state
-        });
-
-    res.redirect(authUrl);
-});
+);
 
 
-// =========================
-// YOUTUBE OAUTH CALLBACK
-// =========================
+// ============================================================
+// YOUTUBE CALLBACK
+// ============================================================
 
 app.get(
     "/api/youtube/callback",
@@ -536,7 +565,7 @@ app.get(
             if (error) {
                 return res.status(400).send(`
                     <h1>YouTube authorization failed</h1>
-                    <p>${error}</p>
+                    <p>${escapeHtml(error)}</p>
                 `);
             }
 
@@ -562,23 +591,16 @@ app.get(
             const {
                 tokens
             } =
-                await oauthClient.getToken(
-                    code
-                );
+                await oauthClient.getToken(code);
 
-            oauthClient.setCredentials(
-                tokens
-            );
+            oauthClient.setCredentials(tokens);
 
-            // We need a refresh token so D-Videos
-            // can upload later without asking again.
             if (!tokens.refresh_token) {
-
                 return res.status(400).send(`
                     <h1>No refresh token received</h1>
                     <p>
-                        Revoke the D-Videos Google authorization
-                        and try connecting again.
+                        Revoke D-Videos from your Google account
+                        and connect it again.
                     </p>
                 `);
             }
@@ -589,8 +611,6 @@ app.get(
                     auth: oauthClient
                 });
 
-            // Find the YouTube channel belonging
-            // to the Google account that authorized us.
             const channelResponse =
                 await youtubeAPI.channels.list({
                     part: "snippet",
@@ -601,11 +621,10 @@ app.get(
                 channelResponse.data.items?.[0];
 
             if (!channel) {
-
                 return res.status(400).send(`
                     <h1>No YouTube channel found</h1>
                     <p>
-                        The Google account needs a YouTube channel.
+                        This Google account needs a YouTube channel.
                     </p>
                 `);
             }
@@ -621,14 +640,19 @@ app.get(
 
                 ON CONFLICT(id)
                 DO UPDATE SET
-                    refresh_token = excluded.refresh_token,
-                    channel_id = excluded.channel_id,
-                    channel_title = excluded.channel_title,
-                    connected_at = CURRENT_TIMESTAMP
+                    refresh_token =
+                        excluded.refresh_token,
+                    channel_id =
+                        excluded.channel_id,
+                    channel_title =
+                        excluded.channel_title,
+                    connected_at =
+                        CURRENT_TIMESTAMP
             `).run(
                 tokens.refresh_token,
                 channel.id,
-                channel.snippet?.title || "D-Videos Videos"
+                channel.snippet?.title ||
+                    "D-Videos Videos"
             );
 
             console.log(
@@ -653,13 +677,15 @@ app.get(
                     ${escapeHtml(error.message)}
                 </p>
             `);
+
         }
+
     }
 );
 
 
 // ============================================================
-// YOUTUBE CONNECTION STATUS
+// YOUTUBE STATUS
 // ============================================================
 
 app.get(
@@ -667,14 +693,15 @@ app.get(
     requireLogin,
     (req, res) => {
 
-        const auth = db.prepare(`
-            SELECT
-                channel_id,
-                channel_title,
-                connected_at
-            FROM youtube_auth
-            WHERE id = 1
-        `).get();
+        const auth =
+            db.prepare(`
+                SELECT
+                    channel_id,
+                    channel_title,
+                    connected_at
+                FROM youtube_auth
+                WHERE id = 1
+            `).get();
 
         if (!auth) {
             return res.json({
@@ -684,10 +711,15 @@ app.get(
 
         res.json({
             connected: true,
+
             channel: {
-                id: auth.channel_id,
-                title: auth.channel_title
+                id:
+                    auth.channel_id,
+
+                title:
+                    auth.channel_title
             },
+
             connectedAt:
                 auth.connected_at
         });
@@ -773,8 +805,7 @@ app.post(
                                 description ||
                                 "Uploaded to D-Videos.",
 
-                            categoryId:
-                                "22"
+                            categoryId: "22"
 
                         },
 
@@ -785,7 +816,9 @@ app.post(
 
                             selfDeclaredMadeForKids:
                                 false
+
                         }
+
                     },
 
                     media: {
@@ -794,14 +827,13 @@ app.post(
                             fs.createReadStream(
                                 uploadedFile.path
                             )
+
                     }
+
                 });
 
-            const youtubeVideo =
-                response.data;
-
             const youtubeId =
-                youtubeVideo.id;
+                response.data.id;
 
             if (!youtubeId) {
                 throw new Error(
@@ -832,11 +864,6 @@ app.post(
                     req.session.userId
                 );
 
-            console.log(
-                "YouTube upload complete:",
-                youtubeId
-            );
-
             res.json({
 
                 success: true,
@@ -849,6 +876,7 @@ app.post(
                 title,
 
                 thumbnail
+
             });
 
         } catch (error) {
@@ -875,38 +903,41 @@ app.post(
                     fs.unlinkSync(
                         uploadedFile.path
                     );
-                } catch {
-                    // Already deleted.
-                }
+                } catch {}
             }
+
         }
+
     }
 );
 
 
 // ============================================================
-// GET VIDEOS
+// VIDEO LIST
 // ============================================================
 
 app.get(
     "/api/videos",
     (req, res) => {
 
-        const videos = db.prepare(`
-            SELECT
-                videos.id,
-                videos.title,
-                videos.description,
-                videos.youtube_id,
-                videos.thumbnail,
-                videos.category,
-                videos.created_at,
-                users.username AS uploader
-            FROM videos
-            JOIN users
-                ON users.id = videos.uploader_id
-            ORDER BY videos.created_at DESC
-        `).all();
+        const videos =
+            db.prepare(`
+                SELECT
+                    videos.id,
+                    videos.title,
+                    videos.description,
+                    videos.youtube_id,
+                    videos.thumbnail,
+                    videos.category,
+                    videos.created_at,
+                    users.username AS uploader
+                FROM videos
+                JOIN users
+                    ON users.id =
+                        videos.uploader_id
+                ORDER BY
+                    videos.created_at DESC
+            `).all();
 
         res.json({
             videos
@@ -917,7 +948,7 @@ app.get(
 
 
 // ============================================================
-// GET SINGLE VIDEO
+// SINGLE VIDEO
 // ============================================================
 
 app.get(
@@ -937,7 +968,8 @@ app.get(
                     users.username AS uploader
                 FROM videos
                 JOIN users
-                    ON users.id = videos.uploader_id
+                    ON users.id =
+                        videos.uploader_id
                 WHERE videos.id = ?
             `).get(req.params.id);
 
@@ -978,7 +1010,9 @@ app.use(
                     error:
                         "The video is too large."
                 });
+
             }
+
         }
 
         res.status(500).json({
@@ -986,33 +1020,23 @@ app.use(
                 error.message ||
                 "Something went wrong."
         });
+
     }
 );
 
 
-// =========================
-// ESCAPE HTML
-// =========================
-
-function escapeHtml(value) {
-
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-
-// =========================
+// ============================================================
 // START
-// =========================
+// ============================================================
 
-app.listen(PORT, () => {
+app.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
 
-    console.log(
-        `D-Videos running on port ${PORT}`
-    );
+        console.log(
+            `D-Videos running on port ${PORT}`
+        );
 
-});
+    }
+);
