@@ -1,6 +1,5 @@
 /* =========================================================
-   D-VIDEOS
-   Main stylesheet
+   D-VIDEOS — COMPLETE STYLESHEET
    ========================================================= */
 
 :root {
@@ -91,7 +90,7 @@ button {
 .site-header {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
 
     height: 70px;
 
@@ -134,6 +133,7 @@ button {
 
     font-size: 20px;
     font-weight: 800;
+
     letter-spacing: -0.5px;
 
     white-space: nowrap;
@@ -165,6 +165,7 @@ button {
 .main-nav {
     display: flex;
     align-items: center;
+
     gap: 8px;
 }
 
@@ -188,6 +189,7 @@ button {
 .header-account {
     display: flex;
     align-items: center;
+
     gap: 10px;
 }
 
@@ -197,9 +199,9 @@ button {
     border: 1px solid var(--border-light);
     border-radius: 9px;
 
-    color: var(--text);
-
     background: var(--card);
+
+    color: var(--text);
 
     transition:
         background 0.18s ease,
@@ -209,6 +211,7 @@ button {
 
 .nav-button:hover {
     background: var(--card-hover);
+
     border-color: #414b57;
 
     transform: translateY(-1px);
@@ -281,13 +284,13 @@ main {
 }
 
 .video-info h1 {
+    margin-bottom: 12px;
+
     font-size: clamp(24px, 3vw, 36px);
 
     line-height: 1.2;
 
     letter-spacing: -0.8px;
-
-    margin-bottom: 12px;
 }
 
 .video-meta {
@@ -298,15 +301,16 @@ main {
 
     gap: 9px;
 
+    margin-bottom: 22px;
+
     color: var(--text-muted);
 
     font-size: 14px;
-
-    margin-bottom: 22px;
 }
 
 .video-meta span:first-child {
     color: var(--accent);
+
     font-weight: 700;
 }
 
@@ -378,7 +382,8 @@ main {
     background:
         rgba(255, 98, 98, 0.08);
 
-    border: 1px solid rgba(255, 98, 98, 0.3);
+    border: 1px solid
+        rgba(255, 98, 98, 0.3);
 
     border-radius: var(--radius-small);
 
@@ -611,10 +616,10 @@ main {
 .upload-form label {
     margin-top: 8px;
 
+    color: var(--text-soft);
+
     font-size: 14px;
     font-weight: 700;
-
-    color: var(--text-soft);
 }
 
 .upload-form input,
@@ -690,18 +695,18 @@ main {
 
     padding: 13px 15px;
 
-    border-radius: var(--radius-small);
-
     background: var(--bg-soft);
 
     border: 1px solid var(--border);
+
+    border-radius: var(--radius-small);
 
     color: var(--text-soft);
 }
 
 
 /* =========================================================
-   VIDEO GRID / HOMEPAGE
+   VIDEO GRID
    ========================================================= */
 
 .video-grid {
@@ -741,9 +746,9 @@ main {
 
     aspect-ratio: 16 / 9;
 
-    object-fit: cover;
-
     display: block;
+
+    object-fit: cover;
 
     background: #080a0c;
 }
@@ -753,12 +758,12 @@ main {
 }
 
 .video-card-title {
+    margin-bottom: 7px;
+
     font-size: 16px;
     font-weight: 750;
 
     line-height: 1.3;
-
-    margin-bottom: 7px;
 }
 
 .video-card-uploader {
@@ -781,9 +786,9 @@ main {
 
     padding: 10px 16px;
 
-    border-radius: var(--radius-small);
-
     border: 1px solid var(--border-light);
+
+    border-radius: var(--radius-small);
 
     background: var(--card);
 
@@ -812,6 +817,95 @@ main {
 
 .button-primary:hover {
     background: var(--accent-hover);
+}
+
+
+/* =========================================================
+   COOKIE NOTICE
+   ========================================================= */
+
+.cookie-notice {
+    position: fixed;
+
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+
+    z-index: 99999;
+
+    width: min(
+        calc(100% - 40px),
+        760px
+    );
+
+    margin: 0 auto;
+
+    padding: 15px 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    background: rgba(21, 26, 32, 0.97);
+
+    border: 1px solid var(--border-light);
+
+    border-radius: 13px;
+
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.45);
+
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.cookie-notice-text {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+.cookie-notice-text strong {
+    color: var(--text);
+
+    font-size: 14px;
+}
+
+.cookie-notice-text span {
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+.cookie-button {
+    flex-shrink: 0;
+
+    padding: 9px 16px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background: var(--accent);
+
+    color: #07120e;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        transform 0.18s ease;
+}
+
+.cookie-button:hover {
+    background: var(--accent-hover);
+
+    transform: translateY(-1px);
 }
 
 
@@ -871,6 +965,29 @@ main {
 
     .video-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .cookie-notice {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 12px;
+
+        bottom: 12px;
+
+        left: 12px;
+        right: 12px;
+
+        width: calc(100% - 24px);
+    }
+
+    .cookie-button {
+        width: 100%;
     }
 }
 
